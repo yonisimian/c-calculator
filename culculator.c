@@ -4,14 +4,13 @@
 #include "utils.h"
 #include "list.h"
 
-char* error = "";
-
 void getExpression(char* expression);
 enum ErrorCode validate(char* expression);
-double calculate(char* expression);
+double calculate(char* expression, int* another);
 void checkAnotherCulculation(int* another);
 
 int findEndOfNumber(char* string, int index);
+int findEndOfWord(char* string, int index);
 int findClosingBracket(char* string, int index);
 
 void generateHelpTitle();
@@ -32,7 +31,6 @@ int main()
     // Declarations
     int another = 1; // Continue if we want another culculation
     char expression[MAX_LENGTH]; // The expression to calculate
-    error = "";
 
     // Main loop
     while (another)
@@ -42,21 +40,15 @@ int main()
         {
             case NO_ERROR:
             {
-                double result = calculate(expression);
-                if (result == INFINITY)
-                    printf("%s\n", error);
-                else
+                double result = calculate(expression, &another);
+                if (result != INFINITY)
                     printf("The result is: %g\n", result);
                 break;
             }
             case TOO_LONG: printf("The expression is too long. We don't do that here.\n"); break;
             default: printf("Unknown error occured during the calculation.\nWe're sorry :(\n"); break;
         }
-
-        //printf("\nexpression is %s\n\n", expression);
-        checkAnotherCulculation(&another);
         printf("\n");
-        error = "";
     }
 
     // Closing title
@@ -86,7 +78,8 @@ ErrorCode validate(char* expression)
 }
 
 // calculates "expression" and prints result
-double calculate(char* expression)
+// sets "another" to 0 if user chose to quit.
+double calculate(char* expression, int* another)
 {
     // Declerations
     List list = listCreate();
@@ -108,17 +101,45 @@ double calculate(char* expression)
             }
             case OPERATOR:
                 break;
+            case LETTER:
+            {
+                int end = findEndOfWord(expression, i);
+                char* word = (char*)malloc(end + 1 - i);
+                word = substring(expression, i, end + 1);
+                int value = getWord(word);
+                switch (value)
+                {
+                    case HELP: case HISTORY: case QUIT:
+                    {
+                        if (strlen(word) == strlen(expression))
+                        {
+                            if (value == HELP) generateHelpTitle();
+                            else if (value == HISTORY) generateHistoryTitle();
+                            else *another = 0;
+                        }
+                        else
+                            printf("The words HELP, HISTORY and QUIT must come alone and not inside an expression.");
+                        return INFINITY;
+                    }
+                    default:
+                        printf("SYNTAX ERROR: unknown word %s", word);
+                        return INFINITY;
+                }
+                free(word);
+                i = end;
+                break;
+            }
             default:
             {
                 if(cur_op.value == '(')
                 {
                     int end = findClosingBracket(expression, i);
                     char* inner_expression = substring(expression, i + 1, end);
-                    double inner_result = calculate(inner_expression);
+                    double inner_result = calculate(inner_expression, another);
                     free(inner_expression);
 
-                    if (strlen(error) > 0)
-                        return 0;
+                    if (end < 1)
+                        return INFINITY;
 
                     cur_op.type = OPRAND;
                     cur_op.value = inner_result;
@@ -169,6 +190,14 @@ int findEndOfNumber(char* string, int index)
     return index - 1;
 }
 
+// Find last letter of a word starts in "index"
+int findEndOfWord(char* string, int index)
+{
+    while (getType(string, ++index) == LETTER);
+
+    return index - 1;
+}
+
 // Find index of a bracket that closes the bracket in "index"
 int findClosingBracket(char* string, int index)
 {
@@ -186,13 +215,14 @@ int findClosingBracket(char* string, int index)
                     return index;
                 break;
             case '\0': case EOF:
-                strcpy(error, "SYNTAX ERROR: Too many opening brackets");
+                printf("SYNTAX ERROR: Too many opening brackets");
                 return -1;
                 break;
             default:
                 break;
         }
     }
+    printf("SYNTAX ERROR: Too many closing brackets");
     return -1;
 }
 
@@ -212,14 +242,18 @@ void generateHelpTitle()
 
 void generateQuitTitle()
 {
-    printf("############################################\n");
-    printf("#  Thanks for using my culculator program! #\n"); 
-    printf("############################################\n\n");
+    printf(" ###############################################\n");
+    printf("##                                             ##\n"); 
+    printf("##   Thanks for using my culculator program!   ##\n"); 
+    printf("##                                             ##\n"); 
+    printf(" ###############################################\n\n");
 }
 
 void generateHistoryTitle()
 {
-    printf("##################\n");
-    printf("#  Comming Soon! #\n"); 
-    printf("##################\n\n");
+    printf(" ####################\n");
+    printf("##                  ##\n"); 
+    printf("##   Coming soon!   ##\n"); 
+    printf("##                  ##\n"); 
+    printf(" ####################\n\n");
 }

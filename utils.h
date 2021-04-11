@@ -15,10 +15,43 @@ typedef enum ErrorCode
 typedef enum OpType
 {
     UNKNOWN,
-    OPRAND,
-    OPERATOR,
-    BRACKETS
+    OPRAND,     // 1 2 etc.
+    OPERATOR,   // + - etc.
+    BRACKETS,   // ( )
+    LETTER,     // each letter, used for recognizing words in the expression
+    WORD        // recognized words, stored in the list for calculating
 } OpType;
+
+typedef enum Word
+{
+    UNKNOWN_WORD,
+
+    // command words
+    HELP,
+    HISTORY,
+    QUIT,
+
+    // functions
+    SIN,
+    COS,
+    TAN,
+    SQRT,
+    LOG,
+    LN,
+
+    // constants
+    E,
+    PI,
+    PHI,
+
+    // storage variables
+    X,
+    Y,
+    Z
+
+} Word;
+
+static char* WORDS[] = {"help", "history", "quit", "sin", "cos", "tan", "sqrt", "log", "ln", "e", "pi", "phi", "x", "y", "z"}; 
 
 typedef struct Op
 {
@@ -27,6 +60,7 @@ typedef struct Op
 } Op;
 
 OpType getType(char* string, int index);
+int getWord(char* word);
 char* substring(char string[], int start, int length);
 double substringToDouble(char string[], int start, int length);
 void removeSpaces(char* string);
@@ -39,15 +73,29 @@ OpType getType(char* string, int index)
     switch (c)
     {
         case '+': case '-': case '*': case '/': case '%': case '!': case '^': return OPERATOR;
-        case '(': case ')': case '[': case ']': case '{': case '}': return BRACKETS;
+        case '(': case ')': /*case '[': case ']': case '{': case '}':*/ return BRACKETS;
         default:
         {
             if (c >= '0' && c <= '9')
                 return OPRAND;
             
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+                return LETTER;
+            
             return UNKNOWN;
         }
     }
+}
+
+// Returns the word's enum value if recognized.
+// NOTE - unrecognized words return UNKNOWN (=0).
+int getWord(char* word)
+{
+    for (int i = 0; i <= Z; i++)
+        if (!strcasecmp(word, WORDS[i]))
+                return (i+1);
+
+    return UNKNOWN;
 }
 
 // Returns the substring of "string" from "start" to ("end" - 1)
