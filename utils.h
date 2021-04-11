@@ -38,6 +38,7 @@ typedef enum Word
     SQRT,
     LOG,
     LN,
+    ABS,
 
     // constants
     E,
@@ -51,7 +52,7 @@ typedef enum Word
 
 } Word;
 
-static char* WORDS[] = {"help", "history", "quit", "sin", "cos", "tan", "sqrt", "log", "ln", "e", "pi", "phi", "x", "y", "z"}; 
+static char* WORDS[] = {"help", "history", "quit", "sin", "cos", "tan", "sqrt", "log", "ln", "abs", "e", "pi", "phi", "x", "y", "z"}; 
 
 typedef struct Op
 {
@@ -99,6 +100,7 @@ int getWord(char* word)
 }
 
 // Returns the substring of "string" from "start" to ("end" - 1)
+// NOTE: remember to free after usage! 
 char* substring(char string[], int start, int end)
 {
     char* a = (char*)malloc((end - start + 1) * sizeof(char));

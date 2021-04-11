@@ -25,8 +25,10 @@ void listDestroy(List list);
 int listSize(List list);
 void listPrint(List list);
 static void printOp(int index, Op* op);
+static void calculateFunctions(List list);
 static void calculateFactorials(List list);
 static void calculateBinOp(List list, int round);
+static void createError(List list);
 
 // Creates a new empty linked list
 List listCreate(void)
@@ -78,20 +80,77 @@ void listCalculate(List list)
     if (list == NULL || list->size == 0)
         return;
         
+    calculateFunctions(list);   // reduces functions (sin, cos etc.)
     calculateFactorials(list);  // reduces factorials
     calculateBinOp(list, 1);    // reduces powers
     calculateBinOp(list, 2);    // recuces multiplications, divitions, and modulus.
     calculateBinOp(list, 3);    // reduces additions and substructions.
 }
 
+static void calculateFunctions(List list)
+{
+    Node* ptr = list->head;
+
+    // go from right to left
+    while(ptr->next != NULL)
+        ptr = ptr->next;
+    
+    while(ptr != NULL)
+    {
+        Node* next = NULL;
+        int released = 0;
+        Op op = ptr->data;
+
+        if (op.type == FUNCTION)
+        {
+            // check for errors
+            if (ptr->next == NULL || ptr->next->data.type != OPRAND)
+            {
+                    printf("SYNTAX ERROR: you must put an oprand after a function, my dude.\n");
+                    createError(list);
+                    return;
+            }
+
+            switch((int)op.value)
+            {
+                case SIN: ptr->data.value = sin(ptr->next->data.value); break;
+                case COS: ptr->data.value = cos(ptr->next->data.value); break;
+                case TAN: ptr->data.value = tan(ptr->next->data.value); break;
+                case SQRT: ptr->data.value = sqrt(ptr->next->data.value); break;
+                case LOG: ptr->data.value = log10(ptr->next->data.value); break;
+                case LN: ptr->data.value = log(ptr->next->data.value); break;
+                case ABS:  ptr->data.value = (ptr->next->data.value < 0) ? -(ptr->next->data.value) : ptr->next->data.value; break;           
+                default:
+                    printf("CODING ERROR: you shouldn't have reached here. My mistake :(\n");
+                    createError(list);
+                    return;
+            }
+            ptr->data.type = OPRAND;
+
+            if ((int)op.value == ABS)
+                printf("after abs: %g", ptr->data.value);
+
+            free(ptr->next);
+            ptr->next = ptr->next->next;
+            if (ptr->next != NULL)
+                ptr->next->prev = ptr;
+
+            next = ptr->prev;
+            released = 1;
+        }
+        ptr = released ? next : ptr->prev;
+    }
+}
+
 static void calculateFactorials(List list)
 {
     Node* ptr = list->head;
-    Node* next = NULL;
-    int released = 0;
     while(ptr != NULL)
     {
+        Node* next = NULL;
+        int released = 0;
         Op op = ptr->data;
+
         if (op.type == OPERATOR && op.value == '!')
         {
             ptr->prev->data.value = factorial(ptr->prev->data.value);
@@ -113,11 +172,11 @@ static void calculateFactorials(List list)
 static void calculateBinOp(List list, int round)
 {
     Node* ptr = list->head;
-    Node* next = NULL;
     while(ptr != NULL)
     {
         int released = 0;
         Op op = ptr->data;
+        Node* next = NULL;
 
         if (op.type == OPERATOR)
         {
@@ -308,6 +367,15 @@ static void printOp(int index, Op* op)
         printf("Op %d - type %s, value %c\n", index, types[op->type], (int)(op->value));
     else
         printf("Op %d - type %s, value %g\n", index, types[op->type], op->value);
+}
+
+// Forces an error (to be used after an error has been found).
+// takes any list and convert it to list one node with value INFINITY
+static void createError(List list)
+{
+    listDestroy(list);
+    list = listCreate();
+    listAdd(list, (Op){ .type = OPRAND, .value = INFINITY });
 }
 
 #endif

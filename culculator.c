@@ -8,6 +8,7 @@ void getExpression(char* expression);
 enum ErrorCode validate(char* expression);
 double calculate(char* expression, int* another);
 void addMultiplicationIfNeeded(List list);
+void addZeroBeforeMinus(List list);
 
 int findEndOfNumber(char* string, int index);
 int findEndOfWord(char* string, int index);
@@ -19,9 +20,9 @@ void generateHistoryTitle();
 
 /*
     TODO:
-        - Get and print opening and closing titles from a file (calculate needed #)
+        - Get and print titles from a file (calculate needed #)
         - Check validity of the expression
-        - Make "error" extern / modifiable via utils & list
+        - Handle minuses
 */
 int main()
 {
@@ -42,7 +43,11 @@ int main()
             {
                 double result = calculate(expression, &another);
                 if (result != INFINITY)
+                {
+                    if(result < 0.000001 && result > -0.000001)
+                        result = 0;
                     printf("The result is: %g\n", result);
+                }
                 break;
             }
             case TOO_LONG: printf("The expression is too long. We don't do that here.\n"); break;
@@ -99,7 +104,11 @@ double calculate(char* expression, int* another)
                 break;
             }
             case OPERATOR:
+            {
+                if (cur_op.value == '-')
+                    addZeroBeforeMinus(list);
                 break;
+            }
             case LETTER:
             {
                 int end = findEndOfWord(expression, i);
@@ -130,6 +139,12 @@ double calculate(char* expression, int* another)
                             case PHI: cur_op.value = 1.61803398874; break;
                         }
                         addMultiplicationIfNeeded(list); // so 5PI becomes 5*PI 
+                        break;
+                    }
+                    case SIN: case COS: case TAN: case SQRT: case LOG: case LN: case ABS:
+                    {
+                        cur_op.type = FUNCTION;
+                        cur_op.value = value;
                         break;
                     }
                     default:
@@ -183,6 +198,19 @@ void addMultiplicationIfNeeded(List list)
             Op new_op = { .type = OPERATOR, .value = '*' };
             listAdd(list, new_op);
         }
+    }
+}
+
+// adding 0 if needed so -5 will become 0-5
+void addZeroBeforeMinus(List list)
+{
+    if (list->size == 0)
+        listAdd(list, (Op){ .type = OPRAND, .value = '0' });
+    else
+    {
+        Op last_op = *listGet(list, list->size - 1);
+        if (last_op.type != OPRAND)
+            listAdd(list, (Op){ .type = OPRAND, .value = '0' });
     }
 }
 
