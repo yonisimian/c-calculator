@@ -7,7 +7,7 @@
 void getExpression(char* expression);
 enum ErrorCode validate(char* expression);
 double calculate(char* expression, int* another);
-void checkAnotherCulculation(int* another);
+void addMultiplicationIfNeeded(List list);
 
 int findEndOfNumber(char* string, int index);
 int findEndOfWord(char* string, int index);
@@ -83,7 +83,6 @@ double calculate(char* expression, int* another)
 {
     // Declerations
     List list = listCreate();
-    int list_index = 0;
     double result = 0.0;
 
     // Fill list
@@ -118,11 +117,23 @@ double calculate(char* expression, int* another)
                             else *another = 0;
                         }
                         else
-                            printf("The words HELP, HISTORY and QUIT must come alone and not inside an expression.");
+                            printf("The words HELP, HISTORY and QUIT must come alone and not inside an expression.\n");
                         return INFINITY;
                     }
+                    case E: case PI: case PHI:
+                    {
+                        cur_op.type = OPRAND;
+                        switch (value)
+                        {
+                            case E:   cur_op.value = 2.71828182846; break;
+                            case PI:  cur_op.value = 3.14159265358; break;
+                            case PHI: cur_op.value = 1.61803398874; break;
+                        }
+                        addMultiplicationIfNeeded(list); // so 5PI becomes 5*PI 
+                        break;
+                    }
                     default:
-                        printf("SYNTAX ERROR: unknown word %s", word);
+                        printf("SYNTAX ERROR: unknown word %s.\nWrite HELP for more information.\n", word);
                         return INFINITY;
                 }
                 free(word);
@@ -144,16 +155,7 @@ double calculate(char* expression, int* another)
                     cur_op.type = OPRAND;
                     cur_op.value = inner_result;
 
-                    // adding * if needed so 5(1+2) will become 5*(1+2)
-                    if (list_index > 0)
-                    {
-                        Op last_op = *listGet(list, list_index - 1);
-                        if (last_op.type == OPRAND)
-                        {
-                            Op new_op = { .type = OPERATOR, .value = '*' };
-                            listAdd(list, new_op);
-                        }
-                    }
+                    addMultiplicationIfNeeded(list); // so 5(1+2) becomes 5*(1+2)
                     i = end;
                 }
                 break;
@@ -169,14 +171,19 @@ double calculate(char* expression, int* another)
     return result;
 }
 
-// Check if the user wants another culculation
-void checkAnotherCulculation(int* another)
+// adding * if needed so 5PI will become 5*PI = 5 * 3.14
+void addMultiplicationIfNeeded(List list)
 {
-    printf("\nDo you want me to perform another culculation? (Y/n) ");
-    int n = getchar();
-
-    *another = (n == 'n' || n == 'N' || n == EOF) ? 0 : 1;
-    getchar(); // IDK why, but it prevents another loop
+    int size = list->size;
+    if (size > 0)
+    {
+        Op last_op = *listGet(list, size - 1);
+        if (last_op.type == OPRAND)
+        {
+            Op new_op = { .type = OPERATOR, .value = '*' };
+            listAdd(list, new_op);
+        }
+    }
 }
 
 // Find last digit of a number starts in "index"

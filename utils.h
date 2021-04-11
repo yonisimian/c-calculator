@@ -19,7 +19,7 @@ typedef enum OpType
     OPERATOR,   // + - etc.
     BRACKETS,   // ( )
     LETTER,     // each letter, used for recognizing words in the expression
-    WORD        // recognized words, stored in the list for calculating
+    FUNCTION    // recognized words, stored in the list for calculating
 } OpType;
 
 typedef enum Word

@@ -77,7 +77,7 @@ void listCalculate(List list)
 {
     if (list == NULL || list->size == 0)
         return;
-
+        
     calculateFactorials(list);  // reduces factorials
     calculateBinOp(list, 1);    // reduces powers
     calculateBinOp(list, 2);    // recuces multiplications, divitions, and modulus.
@@ -114,10 +114,11 @@ static void calculateBinOp(List list, int round)
 {
     Node* ptr = list->head;
     Node* next = NULL;
-    int released = 0;
     while(ptr != NULL)
     {
+        int released = 0;
         Op op = ptr->data;
+
         if (op.type == OPERATOR)
         {
             switch (round)
@@ -133,7 +134,7 @@ static void calculateBinOp(List list, int round)
                 {
                     switch ((int)op.value)
                     {
-                        case '*': ptr->prev->data.value *= ptr->next->data.value; released = 1; break;
+                        case '*': ptr->prev->data.value *= ptr->next->data.value; released = 1;  break;
                         case '/': ptr->prev->data.value /= ptr->next->data.value; released = 1;  break;
                         case '%': ptr->prev->data.value = (int)(ptr->prev->data.value) % (int)(ptr->next->data.value); released = 1;  break;
                     }
@@ -160,7 +161,7 @@ static void calculateBinOp(List list, int round)
                 free(ptr);
             }
         }
-        ptr = released ? next : ptr->next;
+        ptr = released ? next : ptr->next;  
     }
 }
 
