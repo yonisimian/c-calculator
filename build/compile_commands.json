@@ -1,7 +1,0 @@
-[
-{
-  "directory": "C:/Users/yonis/OneDrive/Documents/Visual Studio Code Projects/c-culculator/build",
-  "command": "C:\\TDM-GCC-64\\bin\\gcc.exe   -std=c99 --pedantic-error -Wall -Werror -g -o CMakeFiles\\my_executable.dir\\culculator.c.obj -c \"C:\\Users\\yonis\\OneDrive\\Documents\\Visual Studio Code Projects\\c-culculator\\culculator.c\"",
-  "file": "C:/Users/yonis/OneDrive/Documents/Visual Studio Code Projects/c-culculator/culculator.c"
-}
-]
