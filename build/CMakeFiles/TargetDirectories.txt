@@ -1,0 +1,3 @@
+C:/Users/yonis/OneDrive/Documents/Visual Studio Code Projects/c-culculator/build/CMakeFiles/my_executable.dir
+C:/Users/yonis/OneDrive/Documents/Visual Studio Code Projects/c-culculator/build/CMakeFiles/edit_cache.dir
+C:/Users/yonis/OneDrive/Documents/Visual Studio Code Projects/c-culculator/build/CMakeFiles/rebuild_cache.dir
