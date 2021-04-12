@@ -167,6 +167,11 @@ static void calculateUnOp(List list)
                             continue;
                         }
                     }
+                    else
+                    {
+                        ptr = ptr->next;
+                        continue;
+                    }
                     break;
                 }
                 default:
