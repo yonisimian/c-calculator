@@ -22,7 +22,6 @@ void generateHistoryTitle();
     TODO:
         - Get and print titles from a file (calculate needed #)
         - Check validity of the expression
-        - Handle minuses
 */
 int main()
 {
@@ -105,8 +104,6 @@ double calculate(char* expression, int* another)
             }
             case OPERATOR:
             {
-                if (cur_op.value == '-')
-                    addZeroBeforeMinus(list);
                 break;
             }
             case LETTER:
@@ -115,41 +112,51 @@ double calculate(char* expression, int* another)
                 char* word = (char*)malloc(end + 1 - i);
                 word = substring(expression, i, end + 1);
                 int value = getWord(word);
-                switch (value)
+
+                // commands: HELP, HISTORY, QUIT
+                if (value >= HELP && value < SIN)
                 {
-                    case HELP: case HISTORY: case QUIT:
+                    if (strlen(word) == strlen(expression))
                     {
-                        if (strlen(word) == strlen(expression))
-                        {
-                            if (value == HELP) generateHelpTitle();
-                            else if (value == HISTORY) generateHistoryTitle();
-                            else *another = 0;
-                        }
-                        else
-                            printf("The words HELP, HISTORY and QUIT must come alone and not inside an expression.\n");
-                        return INFINITY;
+                        if (value == HELP) generateHelpTitle();
+                        else if (value == HISTORY) generateHistoryTitle();
+                        else *another = 0;
                     }
-                    case E: case PI: case PHI:
+                    else
+                        printf("The words HELP, HISTORY and QUIT must come alone and not inside an expression.\n");
+                    return INFINITY;
+                }
+
+                // functions: SIN, COS, TAN, SQRT, LOG, LN, ABS
+                else if (value >= SIN && value < E)
+                {
+                    cur_op.type = FUNCTION;
+                    cur_op.value = value;
+                }
+
+                // constants: E, PI, PHI
+                else if (value >= E && value < X)
+                {
+                    cur_op.type = OPRAND;
+                    switch (value)
                     {
-                        cur_op.type = OPRAND;
-                        switch (value)
-                        {
-                            case E:   cur_op.value = 2.71828182846; break;
-                            case PI:  cur_op.value = 3.14159265358; break;
-                            case PHI: cur_op.value = 1.61803398874; break;
-                        }
-                        addMultiplicationIfNeeded(list); // so 5PI becomes 5*PI 
-                        break;
+                        case E:   cur_op.value = 2.71828182846; break;
+                        case PI:  cur_op.value = 3.14159265358; break;
+                        case PHI: cur_op.value = 1.61803398874; break;
                     }
-                    case SIN: case COS: case TAN: case SQRT: case LOG: case LN: case ABS:
-                    {
-                        cur_op.type = FUNCTION;
-                        cur_op.value = value;
-                        break;
-                    }
-                    default:
-                        printf("SYNTAX ERROR: unknown word %s.\nWrite HELP for more information.\n", word);
-                        return INFINITY;
+                    addMultiplicationIfNeeded(list); // so 5PI becomes 5*PI 
+                }
+
+                // storgae variables: X, Y, Z
+                else if (value >= X && value < Z)
+                {
+                    //TODO: allow "x=5" to store 5 in x for later use.
+                }
+
+                else
+                {
+                    printf("SYNTAX ERROR: unknown word %s.\nWrite HELP for more information.\n", word);
+                    return INFINITY;
                 }
                 free(word);
                 i = end;
@@ -201,16 +208,16 @@ void addMultiplicationIfNeeded(List list)
     }
 }
 
-// adding 0 if needed so -5 will become 0-5
+// adding 0 if needed so -5 will become (0-5)
 void addZeroBeforeMinus(List list)
 {
     if (list->size == 0)
-        listAdd(list, (Op){ .type = OPRAND, .value = '0' });
+        listAdd(list, (Op){ .type = OPRAND, .value = 0 });
     else
     {
         Op last_op = *listGet(list, list->size - 1);
         if (last_op.type != OPRAND)
-            listAdd(list, (Op){ .type = OPRAND, .value = '0' });
+            listAdd(list, (Op){ .type = OPRAND, .value = 0 });
     }
 }
 
@@ -267,10 +274,16 @@ void generateHelpTitle()
     printf("##                                                                   ##\n"); 
     printf("##   This is a culculator program.                                   ##\n"); 
     printf("##                                                                   ##\n"); 
-    printf("##   Write an expression using the next operations: + - * / %% ^ !    ##\n"); 
+    printf("##   Write an expression using the next operations: + - * / %% ^ !    ##\n");
+    printf("##   You can use the constants e, pi, phi anytime you'd like.        ##\n"); 
+    printf("##   You can use the functions sin, cos, tan, sqrt, log, ln, abs.    ##\n"); 
+    printf("##                                                                   ##\n"); 
     printf("##   Write HELP to show this message again.                          ##\n"); 
-    printf("##   Write HISTORY to show this culculation history.                 ##\n"); 
+    printf("##   Write HISTORY to show the culculation history.                  ##\n"); 
     printf("##   Write QUIT to quit the program.                                 ##\n"); 
+    printf("##                                                                   ##\n"); 
+    printf("##   The program is case-insensitive, so sin = SIN, pi = PI etc.     ##\n"); 
+    printf("##   Enjoy!                                                          ##\n"); 
     printf("##                                                                   ##\n"); 
     printf(" #####################################################################\n\n");
 }

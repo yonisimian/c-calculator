@@ -26,9 +26,10 @@ int listSize(List list);
 void listPrint(List list);
 static void printOp(int index, Op* op);
 static void calculateFunctions(List list);
-static void calculateFactorials(List list);
+static void calculateUnOp(List list);
 static void calculateBinOp(List list, int round);
-static void createError(List list);
+static void forceError(List list);
+static Node* nodeRemove(List list, Node* node);
 
 // Creates a new empty linked list
 List listCreate(void)
@@ -79,9 +80,9 @@ void listCalculate(List list)
 {
     if (list == NULL || list->size == 0)
         return;
-        
+
     calculateFunctions(list);   // reduces functions (sin, cos etc.)
-    calculateFactorials(list);  // reduces factorials
+    calculateUnOp(list);        // reduces factorials and minuses
     calculateBinOp(list, 1);    // reduces powers
     calculateBinOp(list, 2);    // recuces multiplications, divitions, and modulus.
     calculateBinOp(list, 3);    // reduces additions and substructions.
@@ -97,8 +98,6 @@ static void calculateFunctions(List list)
     
     while(ptr != NULL)
     {
-        Node* next = NULL;
-        int released = 0;
         Op op = ptr->data;
 
         if (op.type == FUNCTION)
@@ -107,61 +106,76 @@ static void calculateFunctions(List list)
             if (ptr->next == NULL || ptr->next->data.type != OPRAND)
             {
                     printf("SYNTAX ERROR: you must put an oprand after a function, my dude.\n");
-                    createError(list);
+                    forceError(list);
                     return;
             }
 
             switch((int)op.value)
             {
-                case SIN: ptr->data.value = sin(ptr->next->data.value); break;
-                case COS: ptr->data.value = cos(ptr->next->data.value); break;
-                case TAN: ptr->data.value = tan(ptr->next->data.value); break;
+                case SIN:  ptr->data.value = sin(ptr->next->data.value); break;
+                case COS:  ptr->data.value = cos(ptr->next->data.value); break;
+                case TAN:  ptr->data.value = tan(ptr->next->data.value); break;
                 case SQRT: ptr->data.value = sqrt(ptr->next->data.value); break;
-                case LOG: ptr->data.value = log10(ptr->next->data.value); break;
-                case LN: ptr->data.value = log(ptr->next->data.value); break;
+                case LOG:  ptr->data.value = log10(ptr->next->data.value); break;
+                case LN:   ptr->data.value = log(ptr->next->data.value); break;
                 case ABS:  ptr->data.value = (ptr->next->data.value < 0) ? -(ptr->next->data.value) : ptr->next->data.value; break;           
                 default:
                     printf("CODING ERROR: you shouldn't have reached here. My mistake :(\n");
-                    createError(list);
+                    forceError(list);
                     return;
             }
             ptr->data.type = OPRAND;
-
-            if ((int)op.value == ABS)
-                printf("after abs: %g", ptr->data.value);
-
-            free(ptr->next);
-            ptr->next = ptr->next->next;
-            if (ptr->next != NULL)
-                ptr->next->prev = ptr;
-
-            next = ptr->prev;
-            released = 1;
+            nodeRemove(list, ptr->next);
         }
-        ptr = released ? next : ptr->prev;
+
+        ptr = ptr->prev;
     }
 }
 
-static void calculateFactorials(List list)
+// calculates unary opertors: ! and -
+// NOTE: - must be calculated here so 5^-1 will be legal expression.
+static void calculateUnOp(List list)
 {
     Node* ptr = list->head;
     while(ptr != NULL)
     {
-        Node* next = NULL;
-        int released = 0;
         Op op = ptr->data;
 
-        if (op.type == OPERATOR && op.value == '!')
+        if (op.type == OPERATOR)
         {
-            ptr->prev->data.value = factorial(ptr->prev->data.value);
-            ptr->prev->next = ptr->next;
-            if (ptr->next != NULL)
-                ptr->next->prev = ptr->prev;
-            next = ptr->next;
-            free(ptr);
-            released = 1;
+            switch ((int)op.value)
+            {
+                case '!':
+                {
+                    ptr->prev->data.value = factorial(ptr->prev->data.value);
+                    ptr = nodeRemove(list, ptr);
+                    continue;
+                }
+                case '-':
+                {
+                    if (ptr->prev == NULL || ptr->prev->data.type != OPRAND)
+                    {
+                        if (ptr->next == NULL || ptr->next->data.type != OPRAND)
+                        {
+                            printf("SYNTAX ERROR: you must substract SOMETHING, fella.\n");
+                            forceError(list);
+                        }
+                        else // prev node isn't OPRAND, next node is OPRAND
+                        {
+                            ptr->next->data.value *= -1;
+                            ptr = nodeRemove(list, ptr);
+                            continue;
+                        }
+                    }
+                    break;
+                }
+                default:
+                    ptr = ptr->next;
+                    continue;
+            }
         }
-        ptr = released ? next : ptr->next;
+        else
+            ptr = ptr->next;
     }
 }
 
@@ -174,9 +188,7 @@ static void calculateBinOp(List list, int round)
     Node* ptr = list->head;
     while(ptr != NULL)
     {
-        int released = 0;
         Op op = ptr->data;
-        Node* next = NULL;
 
         if (op.type == OPERATOR)
         {
@@ -184,18 +196,21 @@ static void calculateBinOp(List list, int round)
             {
                 case 1:
                     if ((int)op.value == '^')
-                    {
                         ptr->prev->data.value = pow(ptr->prev->data.value, ptr->next->data.value);
-                        released = 1;
+                    else
+                    {
+                        ptr = ptr->next;
+                        continue;
                     }
                     break;
                 case 2:
                 {
                     switch ((int)op.value)
                     {
-                        case '*': ptr->prev->data.value *= ptr->next->data.value; released = 1;  break;
-                        case '/': ptr->prev->data.value /= ptr->next->data.value; released = 1;  break;
-                        case '%': ptr->prev->data.value = (int)(ptr->prev->data.value) % (int)(ptr->next->data.value); released = 1;  break;
+                        case '*': ptr->prev->data.value *= ptr->next->data.value; break;
+                        case '/': ptr->prev->data.value /= ptr->next->data.value; break;
+                        case '%': ptr->prev->data.value = (int)(ptr->prev->data.value) % (int)(ptr->next->data.value); break;
+                        default:  ptr = ptr->next; continue;
                     }
                     break;
                 }
@@ -203,24 +218,22 @@ static void calculateBinOp(List list, int round)
                 {
                     switch ((int)op.value)
                     {
-                        case '+': ptr->prev->data.value += ptr->next->data.value; released = 1;  break;
-                        case '-': ptr->prev->data.value -= ptr->next->data.value; released = 1;  break;
+                        case '+': ptr->prev->data.value += ptr->next->data.value; break;
+                        case '-': ptr->prev->data.value -= ptr->next->data.value; break;
+                        default:  ptr = ptr->next; continue;
                     }
                     break;
                 }
             }
 
-            if (released)
-            {
-                ptr->prev->next = ptr->next->next;
-                if (ptr->next->next != NULL)
-                    ptr->next->next->prev = ptr->prev;
-                next = ptr->next->next;
-                free(ptr->next);
-                free(ptr);
-            }
+            // we've reached here only if we encountered an operation. 
+            Node* next = ptr->next->next;
+            nodeRemove(list, ptr->next);
+            nodeRemove(list, ptr);
+            ptr = next; 
         }
-        ptr = released ? next : ptr->next;  
+        else // not an operator, skip
+            ptr = ptr->next;
     }
 }
 
@@ -304,7 +317,7 @@ void listPrint(List list)
     if (list->head == NULL)
     {
         if (list->size != 0)
-            printf("Something's wrong, I can feel it. list's size is %d but head is NULL.\n", list->size);
+            printf("CODING ERROR: Something's wrong, I can feel it. list's size is %d but head is NULL.\n", list->size);
 
         printf("[]\n");
             return;
@@ -344,7 +357,7 @@ void listPrint2(List list)
     if (list->head == NULL)
     {
         if (list->size != 0)
-            printf("Something's wrong, I can feel it. list's size is %d but head is NULL.\n", list->size);
+            printf("CODING ERROR: Something's wrong, I can feel it. list's size is %d but head is NULL.\n", list->size);
 
         printf("[]\n");
             return;
@@ -371,11 +384,38 @@ static void printOp(int index, Op* op)
 
 // Forces an error (to be used after an error has been found).
 // takes any list and convert it to list one node with value INFINITY
-static void createError(List list)
+static void forceError(List list)
 {
     listDestroy(list);
     list = listCreate();
     listAdd(list, (Op){ .type = OPRAND, .value = INFINITY });
+}
+
+// C'mon tis not need for eggsplenashen
+// okOK, it removes a node and connect the prev to the next.
+// Oh, and it returns a pointer to the next node.
+// NOTE: I'm assuming that node is in this specific list!
+static Node* nodeRemove(List list, Node* node)
+{
+    if (node == NULL)
+        return NULL;
+
+    Node* prev = node->prev;
+    Node* next = node->next;
+    if (prev != NULL)
+        prev->next = next;
+    if (next != NULL)
+        next->prev = prev;
+
+    if (list != NULL)
+    {
+        list->size--;
+        if (node == list->head)
+            list->head = next;
+    }
+    free(node);
+
+    return next;
 }
 
 #endif
