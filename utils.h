@@ -48,7 +48,8 @@ typedef enum Word
     // storage variables
     X,
     Y,
-    Z
+    Z,
+    ANS
 
 } Word;
 

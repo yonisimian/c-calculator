@@ -24,6 +24,7 @@ int listRemoveAt(List list, int index);
 void listDestroy(List list);
 int listSize(List list);
 void listPrint(List list);
+void listPrint2(List list);
 static void printOp(int index, Op* op);
 static void calculateFunctions(List list);
 static void calculateUnOp(List list);
@@ -289,16 +290,21 @@ int listRemoveAt(List list, int index)
 
 void listDestroy(List list)
 {
-    Node* ptr = list->head;
-
-    while (ptr != NULL)
+    if (list == NULL)
+        return;
+    
+    if (list->head == NULL)
     {
-        Node* next = ptr->next;
-        free(ptr);
-        ptr = next;
+        free(list);
+        return;
     }
 
-    free(list);
+    Node* ptr = list->head->next;
+    free(list->head);
+    list->head = ptr;
+    list->size--;
+
+    listDestroy(list);
 }
 
 int listSize(List list)

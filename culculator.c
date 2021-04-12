@@ -3,6 +3,7 @@
 #include <string.h>
 #include "utils.h"
 #include "list.h"
+#include "queue.h"
 
 void getExpression(char* expression);
 enum ErrorCode validate(char* expression);
@@ -20,8 +21,11 @@ void generateHistoryTitle();
 
 /*
     TODO:
-        - Get and print titles from a file (calculate needed #)
-        - Check validity of the expression
+        - get and print titles from a file (calculate needed #)
+        - check validity of the expression
+        - handle storage variables: X, Y, Z, ANS
+        - add history queue
+        - seperate headers and implementation
 */
 int main()
 {
@@ -147,8 +151,8 @@ double calculate(char* expression, int* another)
                     addMultiplicationIfNeeded(list); // so 5PI becomes 5*PI 
                 }
 
-                // storgae variables: X, Y, Z
-                else if (value >= X && value < Z)
+                // storgae variables: X, Y, Z, ANS
+                else if (value >= X && value <= ANS)
                 {
                     //TODO: allow "x=5" to store 5 in x for later use.
                 }
@@ -305,3 +309,13 @@ void generateHistoryTitle()
     printf("##                  ##\n"); 
     printf(" ####################\n\n");
 }
+
+/*void foo()
+{
+    char* filename = "hi.txt";
+    char* mode = "r"; // r | w | a
+    FILE* stream = fopen(filename, mode);
+    pfrintf(stream, "yyy");
+    char* data = fscanf(stream, "%s");
+    fclose(stream);
+}*/
