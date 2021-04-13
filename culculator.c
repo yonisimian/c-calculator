@@ -5,6 +5,8 @@
 #include "list.h"
 #include "queue.h"
 
+Queue history;
+
 void getExpression(char* expression);
 enum ErrorCode validate(char* expression);
 double calculate(char* expression, int* another);
@@ -17,14 +19,12 @@ int findClosingBracket(char* string, int index);
 
 void generateHelpTitle();
 void generateQuitTitle();
-void generateHistoryTitle();
 
 /*
     TODO:
         - get and print titles from a file (calculate needed #)
         - check validity of the expression
         - handle storage variables: X, Y, Z, ANS
-        - add history queue
         - seperate headers and implementation
 */
 int main()
@@ -35,6 +35,7 @@ int main()
     // Declarations
     int another = 1; // Continue if we want another culculation
     char expression[MAX_LENGTH]; // The expression to calculate
+    history = queueCreate();
 
     // Main loop
     while (another)
@@ -50,6 +51,7 @@ int main()
                     if(result < 0.000001 && result > -0.000001)
                         result = 0;
                     printf("The result is: %g\n", result);
+                    enqueue(history, expression, result);
                 }
                 break;
             }
@@ -62,6 +64,8 @@ int main()
     // Closing title
     generateQuitTitle();
 
+    queueDestroy(history);
+
     return 0;
 }
 
@@ -71,7 +75,7 @@ int main()
 void getExpression(char* expression)
 {
     printf("Please insert an expression to calculate: ");
-    gets(expression);
+    scanf("%s", expression);
 }
 
 // Check the validity of an expression, and return the proper error code.
@@ -123,7 +127,7 @@ double calculate(char* expression, int* another)
                     if (strlen(word) == strlen(expression))
                     {
                         if (value == HELP) generateHelpTitle();
-                        else if (value == HISTORY) generateHistoryTitle();
+                        else if (value == HISTORY) queuePrint(history);
                         else *another = 0;
                     }
                     else
@@ -193,6 +197,8 @@ double calculate(char* expression, int* another)
     // Calculate list
     listCalculate(list);
     result = listGet(list, 0)->value;
+
+    listDestroy(list);
 
     return result;
 }
@@ -287,6 +293,8 @@ void generateHelpTitle()
     printf("##   Write QUIT to quit the program.                                 ##\n"); 
     printf("##                                                                   ##\n"); 
     printf("##   The program is case-insensitive, so sin = SIN, pi = PI etc.     ##\n"); 
+    printf("##   The program is space-insensitive, do not use them please.       ##\n"); 
+    printf("##                                                                   ##\n"); 
     printf("##   Enjoy!                                                          ##\n"); 
     printf("##                                                                   ##\n"); 
     printf(" #####################################################################\n\n");
@@ -299,15 +307,6 @@ void generateQuitTitle()
     printf("##   Thanks for using my culculator program!   ##\n"); 
     printf("##                                             ##\n"); 
     printf(" ###############################################\n\n");
-}
-
-void generateHistoryTitle()
-{
-    printf(" ####################\n");
-    printf("##                  ##\n"); 
-    printf("##   Coming soon!   ##\n"); 
-    printf("##                  ##\n"); 
-    printf(" ####################\n\n");
 }
 
 /*void foo()

@@ -35,7 +35,7 @@ static Node* nodeRemove(List list, Node* node);
 // Creates a new empty linked list
 List listCreate(void)
 {
-    List list = (List)malloc(sizeof(List));
+    List list = malloc(sizeof(*list));
     if (list == NULL)
         return NULL;
     

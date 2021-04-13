@@ -1,11 +1,15 @@
 #ifndef QUEUE_H_
 #define QUEUE_H_
 
-#include "utils.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#define MAX_HISTORY_COUNT 50
 
 typedef struct qNode
 {
-    char* expression;
+    char string[MAX_LENGTH * 2]; //more length for the result.
     struct qNode* next;
 } qNode;
 
@@ -17,11 +21,12 @@ typedef struct Queue
 } *Queue;
 
 Queue queueCreate(void);
-int queueAdd(Queue queue, char* expression);
-char* queueGet(Queue queue, int index);
+int enqueue(Queue queue, char* expression, double result);
+void dequeue(Queue queue);
 void queueDestroy(Queue queue);
 int queueSize(Queue queue);
 void queuePrint(Queue queue);
+static qNode* qNodeCreate(char* expression, double result);
 
 // Creates a new empty queue
 Queue queueCreate(void)
@@ -39,53 +44,58 @@ Queue queueCreate(void)
 
 // Adds an item to the end of the queue.
 // Returns the number of successfully added items.
-int queueAdd(Queue queue, char* expression)
+int enqueue(Queue queue, char* expression, double result)
 {
     if (queue == NULL)
         return 0;
     
-    qNode* new_node = (qNode*)malloc(sizeof(qNode));
+    qNode* new_node = qNodeCreate(expression, result);
     if (new_node == NULL)
         return 0;
 
-    new_node->expression = expression;
-
-    if (queue->front == NULL)
+    if (queue->size == 0)
         queue->front = new_node;
-    /*else
-        ptr->next = new_node;*/
+    else
+        queue->rear->next = new_node;
 
+    queue->rear = new_node;
     queue->size++;
+
+    if (queue->size > MAX_HISTORY_COUNT)
+        dequeue(queue);
 
     return 1;
 }
 
-// Returns the string of the queue at a specific index 
-char* queueGet(Queue queue, int index)
+// Pops the front of a queue
+void dequeue(Queue queue)
 {
-    if (queue == NULL || index < 0 || index >= queue->size)
-        return NULL;
+    if (queue == NULL || queue->size == 0)
+        return;
     
-    qNode* ptr = queue->front;
-    int i = 0;
-    while (ptr != NULL && ptr->next != NULL && i++ < index)
-        ptr = ptr->next;
+    qNode* front = queue->front;
+    queue->front = queue->front->next;
+    queue->size--;
+    free(front);
 
-    return NULL;
+    if (queue->size == 0)
+        queue->rear = NULL;
 }
 
 void queueDestroy(Queue queue)
 {
-    qNode* ptr = queue->front;
-
-    while (ptr != NULL)
+    if (queue == NULL)
+        return;
+    
+    if (queue->size == 0)
     {
-        qNode* next = ptr->next;
-        free(ptr);
-        ptr = next;
+        free(queue);
+        return;
     }
 
-    free(queue);
+    dequeue(queue);
+
+    queueDestroy(queue);
 }
 
 int queueSize(Queue queue)
@@ -106,27 +116,41 @@ int queueSize(Queue queue)
 // **********************
 void queuePrint(Queue queue)
 {
-    if (queue == NULL)
+    printf("*********************\n");
+    printf("                     \n");
+    printf("showing history:     \n");    
+    if (queue == NULL || queue->size == 0)
+        printf("No history.\n");
+    else
     {
-        printf("NULL queue\n");
-        return;
+        int i = queue->size;
+        for (qNode* ptr = queue->front; ptr != NULL; ptr = ptr->next)
+            printf("%d. %s\n", i--, ptr->string);
     }
-    
-    if (queue->front == NULL)
-    {
-        if (queue->size != 0)
-            printf("CODING ERROR: Something's wrong, I can feel it. queue's size is %d but front is NULL.\n", queue->size);
-
-        printf("[]\n");
-            return;
-    }
-
-    printf("Queue of size %d:\n", queue->size);
-    qNode* ptr = queue->front;
-    for (int i = 0; ptr != NULL; i++, ptr = ptr->next)
-        printf("%s\n", ptr->expression);
-    
-    printf("End of queue.\n");
+    printf("                     \n");
+    printf("*********************\n");
 }
+
+static qNode* qNodeCreate(char* expression, double result)
+{
+    qNode* node = (qNode*)malloc(sizeof(qNode));
+    if (node == NULL)
+        return NULL;
+
+    char res[MAX_LENGTH];
+    sprintf(res, "%g", result);
+
+    int i;
+    for (i = 0; (*(node->string + i) = *(expression + i)) != '\0'; i++);
+    *(node->string + i++) = ' ';
+    *(node->string + i++) = '=';
+    *(node->string + i++) = ' ';
+    for (int j = 0; (*(node->string + i) = *(res + j)) != '\0'; i++, j++);
+    //node->expression = strcpy(node->expression, expression);
+    node->next = NULL;
+
+    return node;
+}
+
 
 #endif
