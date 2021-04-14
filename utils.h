@@ -13,10 +13,17 @@
 #define MATH_ERROR   "MATH ERROR"
 #define CODING_ERROR "CODING ERROR"
 
+double variable_x = 0;
+double variable_y = 0;
+double variable_z = 0;
+double variable_ans = 0;
+
 typedef enum ErrorCode
 {
     NO_ERROR,
-    TOO_LONG
+    TOO_LONG,
+    IS_ASSIGNMENT,
+    SILENT_ERROR
 } ErrorCode;
 
 typedef enum OpType
@@ -47,7 +54,7 @@ typedef enum Word
 
 } Word;
 
-static char* WORDS[] = {"help", "history", "quit", "sin", "cos", "tan", "sqrt", "log", "ln", "abs", "e", "pi", "phi", "x", "y", "z"}; 
+static char* WORDS[] = {"help", "history", "quit", "sin", "cos", "tan", "sqrt", "log", "ln", "abs", "e", "pi", "phi", "x", "y", "z", "ans"}; 
 
 typedef struct Op
 {

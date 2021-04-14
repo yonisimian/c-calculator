@@ -87,6 +87,16 @@ void listCalculate(List list)
     calculateBinOp(list, 1);    // reduces powers
     calculateBinOp(list, 2);    // recuces multiplications, divitions, and modulus.
     calculateBinOp(list, 3);    // reduces additions and substructions.
+
+    // all culculations should have reduces to the first node in the list
+    if (list->size > 1)
+    {
+        printf("%s: culculation gone wrong, hit developer for more information.\n", CODING_ERROR);
+        forceError(list);
+        return;
+    }
+
+    variable_ans = list->head->data.value;
 }
 
 static void calculateFunctions(List list)

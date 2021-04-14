@@ -1,9 +1,12 @@
 ---HELP TITLE---
 This is a culculator program.
 
-Write an expression using the next operations: + - * / %% ^ !
+Write an expression using the next operations: + - * / % ^ !
+Write ans for the value of the last calculation.
 You can use the constants e, pi, phi anytime you'd like.
 You can use the functions sin, cos, tan, sqrt, log, ln, abs.
+You can use 3 manually assigned variables: x, y, z.
+Assign those variables by x=[expression], like "x=3pi".
 
 Write HELP to view this message again.
 Write HISTORY to view the culculation history.

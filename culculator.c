@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <conio.h>
 #include "utils.h"
 #include "list.h"
 #include "queue.h"
@@ -11,6 +12,7 @@ char* QUIT_TITLE;
 
 void getExpression(char* expression);
 enum ErrorCode validate(char* expression);
+int isAssignment(char* expression);
 double calculate(char* expression, int* another);
 void addMultiplicationIfNeeded(List list);
 void addZeroBeforeMinus(List list);
@@ -19,16 +21,19 @@ int findEndOfNumber(char* string, int index);
 int findEndOfWord(char* string, int index);
 int findClosingBracket(char* string, int index);
 
+int quitProgram(void);
+
 /*
     TODO:
         - handle spaces
-        - handle storage variables: X, Y, Z, ANS
         - seperate headers and implementation
 */
 int main()
 {
     // importing titles
     HELP_TITLE = generateHelpTitle();
+    if (strcmp(HELP_TITLE, "") == 0)
+        return quitProgram();
     QUIT_TITLE = generateQuitTitle();
     printf("%s\n", HELP_TITLE);
 
@@ -56,6 +61,8 @@ int main()
                 break;
             }
             case TOO_LONG: printf("The expression is too long. We don't do that here.\n"); break;
+            case IS_ASSIGNMENT: printf("Assignment done successfuly :D\n"); break;
+            case SILENT_ERROR: break;
             default: printf("Unknown error occured during the calculation.\nWe're sorry :(\n"); break;
         }
         printf("\n");
@@ -68,7 +75,7 @@ int main()
     free(HELP_TITLE);
     free(QUIT_TITLE);
 
-    return 0;
+    return quitProgram();
 }
 
 
@@ -77,7 +84,8 @@ int main()
 void getExpression(char* expression)
 {
     printf("Please insert an expression to calculate: ");
-    scanf("%s", expression);
+    gets(expression);
+    //scanf("%s", expression);
 }
 
 // Check the validity of an expression, and return the proper error code.
@@ -87,8 +95,37 @@ ErrorCode validate(char* expression)
     //removeSpaces(expression);
     if ((int)strlen(expression) > MAX_LENGTH)
         return TOO_LONG;
+
+    int is_assignment = isAssignment(expression);
+    if (is_assignment == 1)
+        return IS_ASSIGNMENT;
+    else if (is_assignment == -1) // is assignment, but gone wrong. error will tell what happened.
+        return SILENT_ERROR;
     
     return NO_ERROR;
+}
+
+int isAssignment(char* expression)
+{
+    if (expression == NULL || strlen(expression) < 3 || *(expression + 1) != '=' ||
+    (*(expression) != 'x' && *(expression) != 'X' && *(expression) != 'y' && *(expression) != 'Y' && *(expression) != 'z' && *(expression) != 'Z'))
+        return 0; // this is not an assignment
+
+    int dummy = 0;
+    expression += 2;
+    double result = calculate(expression, &dummy);
+    if (result == INFINITY)
+        return -1;
+    
+    expression -= 2;
+    switch (*expression)
+    {
+        case 'x': case 'X': variable_x = result; return 1;
+        case 'y': case 'Y': variable_y = result; return 1;
+        case 'z': case 'Z': variable_z = result; return 1;
+        default:
+            return 0;
+    }
 }
 
 // calculates "expression" and prints result
@@ -144,8 +181,8 @@ double calculate(char* expression, int* another)
                     cur_op.value = value;
                 }
 
-                // constants: E, PI, PHI
-                else if (value >= E && value < X)
+                // constants: E, PI, PHI,   storage variables: X, Y, Z, ANS
+                else if (value >= E && value <= ANS)
                 {
                     cur_op.type = OPRAND;
                     switch (value)
@@ -153,19 +190,17 @@ double calculate(char* expression, int* another)
                         case E:   cur_op.value = 2.71828182846; break;
                         case PI:  cur_op.value = 3.14159265358; break;
                         case PHI: cur_op.value = 1.61803398874; break;
+                        case X:   cur_op.value = variable_x;    break;
+                        case Y:   cur_op.value = variable_y;    break;
+                        case Z:   cur_op.value = variable_z;    break;
+                        case ANS: cur_op.value = variable_ans;  break;
                     }
                     addMultiplicationIfNeeded(list); // so 5PI becomes 5*PI 
                 }
 
-                // storgae variables: X, Y, Z, ANS
-                else if (value >= X && value <= ANS)
-                {
-                    //TODO: allow "x=5" to store 5 in x for later use.
-                }
-
                 else
                 {
-                    printf("%s: unknown word %s.\nWrite HELP for more information.\n", SYNTAX_ERROR, word);
+                    printf("%s: unknown word %s. Write HELP for more information.\n", SYNTAX_ERROR, word);
                     return INFINITY;
                 }
                 free(word);
@@ -201,6 +236,11 @@ double calculate(char* expression, int* another)
                     case ' ':
                     {
                         printf("%s: I told you we don't support spaces yes, but you COULDN'T listen. Shame.\n", SYNTAX_ERROR);
+                        return INFINITY;
+                    }
+                    case '=':
+                    {
+                        printf("%s: '=' is not a valid character except for assignments (for x, y and z)\n", SYNTAX_ERROR);
                         return INFINITY;
                     }
                     default:
@@ -297,4 +337,13 @@ int findClosingBracket(char* string, int index)
     }
     printf("%s: Too many closing brackets\n", SYNTAX_ERROR);
     return -1;
+}
+
+// quits the program ellegantly (did I write it right? or left? :\)
+int quitProgram(void)
+{
+    printf("Press any key to continue...");
+    getch();
+
+    return 0;
 }
