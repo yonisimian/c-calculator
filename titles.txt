@@ -1,0 +1,20 @@
+---HELP TITLE---
+This is a culculator program.
+
+Write an expression using the next operations: + - * / %% ^ !
+You can use the constants e, pi, phi anytime you'd like.
+You can use the functions sin, cos, tan, sqrt, log, ln, abs.
+
+Write HELP to view this message again.
+Write HISTORY to view the culculation history.
+Write QUIT to quit the program.
+
+The program is case-insensitive, so sin = SIN, pi = PI etc.
+The program is space-sensitive, do not use them please.
+
+Enjoy!
+---HELP TITLE END---
+
+---QUIT TITLE---
+Thanks for using my culculator program!
+---QUIT TITLE END---

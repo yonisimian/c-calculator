@@ -6,6 +6,8 @@
 #include "queue.h"
 
 Queue history;
+char* HELP_TITLE;
+char* QUIT_TITLE;
 
 void getExpression(char* expression);
 enum ErrorCode validate(char* expression);
@@ -17,20 +19,18 @@ int findEndOfNumber(char* string, int index);
 int findEndOfWord(char* string, int index);
 int findClosingBracket(char* string, int index);
 
-void generateHelpTitle();
-void generateQuitTitle();
-
 /*
     TODO:
-        - get and print titles from a file (calculate needed #)
         - check validity of the expression
         - handle storage variables: X, Y, Z, ANS
         - seperate headers and implementation
 */
 int main()
 {
-    // Opening title
-    generateHelpTitle();
+    // importing titles
+    HELP_TITLE = generateHelpTitle();
+    QUIT_TITLE = generateQuitTitle();
+    printf("%s\n", HELP_TITLE);
 
     // Declarations
     int another = 1; // Continue if we want another culculation
@@ -62,9 +62,11 @@ int main()
     }
 
     // Closing title
-    generateQuitTitle();
+    printf("%s\n", QUIT_TITLE);
 
     queueDestroy(history);
+    free(HELP_TITLE);
+    free(QUIT_TITLE);
 
     return 0;
 }
@@ -126,8 +128,8 @@ double calculate(char* expression, int* another)
                 {
                     if (strlen(word) == strlen(expression))
                     {
-                        if (value == HELP) generateHelpTitle();
-                        else if (value == HISTORY) queuePrint(history);
+                        if (value == HELP) printf("%s\n", HELP_TITLE);
+                        else if (value == HISTORY) queuePrint2(history);
                         else *another = 0;
                     }
                     else
@@ -277,44 +279,3 @@ int findClosingBracket(char* string, int index)
     printf("SYNTAX ERROR: Too many closing brackets");
     return -1;
 }
-
-void generateHelpTitle()
-{
-    printf(" #####################################################################\n");
-    printf("##                                                                   ##\n"); 
-    printf("##   This is a culculator program.                                   ##\n"); 
-    printf("##                                                                   ##\n"); 
-    printf("##   Write an expression using the next operations: + - * / %% ^ !    ##\n");
-    printf("##   You can use the constants e, pi, phi anytime you'd like.        ##\n"); 
-    printf("##   You can use the functions sin, cos, tan, sqrt, log, ln, abs.    ##\n"); 
-    printf("##                                                                   ##\n"); 
-    printf("##   Write HELP to show this message again.                          ##\n"); 
-    printf("##   Write HISTORY to show the culculation history.                  ##\n"); 
-    printf("##   Write QUIT to quit the program.                                 ##\n"); 
-    printf("##                                                                   ##\n"); 
-    printf("##   The program is case-insensitive, so sin = SIN, pi = PI etc.     ##\n"); 
-    printf("##   The program is space-insensitive, do not use them please.       ##\n"); 
-    printf("##                                                                   ##\n"); 
-    printf("##   Enjoy!                                                          ##\n"); 
-    printf("##                                                                   ##\n"); 
-    printf(" #####################################################################\n\n");
-}
-
-void generateQuitTitle()
-{
-    printf(" ###############################################\n");
-    printf("##                                             ##\n"); 
-    printf("##   Thanks for using my culculator program!   ##\n"); 
-    printf("##                                             ##\n"); 
-    printf(" ###############################################\n\n");
-}
-
-/*void foo()
-{
-    char* filename = "hi.txt";
-    char* mode = "r"; // r | w | a
-    FILE* stream = fopen(filename, mode);
-    pfrintf(stream, "yyy");
-    char* data = fscanf(stream, "%s");
-    fclose(stream);
-}*/
