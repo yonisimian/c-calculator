@@ -6,7 +6,7 @@
 #include <math.h>
 
 #define MAX_LENGTH 100 // The maximum length of an expression
-#define TITLES_FILE_NAME "../titles.txt" // for reading titles
+#define TITLES_FILE_NAME "titles.txt" // for reading titles
 #define BORDER_CHAR '#'
 
 typedef enum ErrorCode
@@ -208,7 +208,6 @@ static char* generateTitle(const char* from, const char* to)
 // makes a nice border arount the text
 void makeItCool(char dest[], char lines[][MAX_LENGTH], int num_of_lines, int line_length)
 {
-    printf("lines[1]: %s\n", lines[1]);
     //printf("starting prettifing. num_of_lines: %d + 6. line_length: %d + 10.\n", num_of_lines, line_length);
     line_length += 10; // 5 more chars in the start and in the end
     num_of_lines += 6; // 3 more line in the start and in the end, it doesn't really matter.
@@ -239,8 +238,6 @@ void makeItCool(char dest[], char lines[][MAX_LENGTH], int num_of_lines, int lin
         {
             while(i < 2)                result[line * line_length + i++] = BORDER_CHAR;
             while(i < 5)                result[line * line_length + i++] = ' ';
-            //for(int j = 0; j <= strlen(lines[line - 3]); j++) printf("%c", lines[line - 3][j]);
-            //printf("%s", lines[line - 3]);
             while((result[line * line_length + i] = lines[line - 3][i - 5]) != '\n') i++; // copy the line itself
             while(i < line_length - 3)  result[line * line_length + i++] = ' ';
             while(i < line_length - 1)  result[line * line_length + i++] = BORDER_CHAR;

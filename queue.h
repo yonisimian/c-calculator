@@ -162,14 +162,13 @@ void queuePrint2(Queue queue)
     }
 
     int num_of_lines = queue->size;
-    int max_length = queue->longest_node + 40;
+    int max_length = queue->longest_node + 4;
 
     char result[(num_of_lines + 6) * (max_length + 10)];
-    char lines[num_of_lines][max_length];
+    char lines[num_of_lines][MAX_LENGTH];
     int i = num_of_lines;
     for (qNode* ptr = queue->front; ptr != NULL; ptr = ptr->next, i--)
         sprintf(lines[num_of_lines - i], "%d. %s\n", i, ptr->string);
-    printf("lines[1]: %s", lines[1]);
     
     makeItCool(result, lines, num_of_lines, max_length);
     printf("%s", result);
