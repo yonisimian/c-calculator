@@ -9,6 +9,10 @@
 #define TITLES_FILE_NAME "titles.txt" // for reading titles
 #define BORDER_CHAR '#'
 
+#define SYNTAX_ERROR "SYNTAX ERROR"
+#define MATH_ERROR   "MATH ERROR"
+#define CODING_ERROR "CODING ERROR"
+
 typedef enum ErrorCode
 {
     NO_ERROR,

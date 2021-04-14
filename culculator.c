@@ -21,7 +21,7 @@ int findClosingBracket(char* string, int index);
 
 /*
     TODO:
-        - check validity of the expression
+        - handle spaces
         - handle storage variables: X, Y, Z, ANS
         - seperate headers and implementation
 */
@@ -48,7 +48,7 @@ int main()
                 double result = calculate(expression, &another);
                 if (result != INFINITY)
                 {
-                    if(result < 0.000001 && result > -0.000001)
+                    if(result < 0.000000001 && result > -0.000000001)
                         result = 0;
                     printf("The result is: %g\n", result);
                     enqueue(history, expression, result);
@@ -129,7 +129,7 @@ double calculate(char* expression, int* another)
                     if (strlen(word) == strlen(expression))
                     {
                         if (value == HELP) printf("%s\n", HELP_TITLE);
-                        else if (value == HISTORY) queuePrint2(history);
+                        else if (value == HISTORY) queuePrint(history);
                         else *another = 0;
                     }
                     else
@@ -165,7 +165,7 @@ double calculate(char* expression, int* another)
 
                 else
                 {
-                    printf("SYNTAX ERROR: unknown word %s.\nWrite HELP for more information.\n", word);
+                    printf("%s: unknown word %s.\nWrite HELP for more information.\n", SYNTAX_ERROR, word);
                     return INFINITY;
                 }
                 free(word);
@@ -174,21 +174,40 @@ double calculate(char* expression, int* another)
             }
             default:
             {
-                if(cur_op.value == '(')
+                switch ((int)cur_op.value)
                 {
-                    int end = findClosingBracket(expression, i);
-                    char* inner_expression = substring(expression, i + 1, end);
-                    double inner_result = calculate(inner_expression, another);
-                    free(inner_expression);
+                    case '(':
+                    {
+                        int end = findClosingBracket(expression, i);
+                        char* inner_expression = substring(expression, i + 1, end);
+                        double inner_result = calculate(inner_expression, another);
+                        free(inner_expression);
 
-                    if (end < 1)
+                        if (end < 1)
+                            return INFINITY;
+
+                        cur_op.type = OPRAND;
+                        cur_op.value = inner_result;
+
+                        addMultiplicationIfNeeded(list); // so 5(1+2) becomes 5*(1+2)
+                        i = end;
+                        break;
+                    }
+                    case ')':
+                    {
+                        printf("%s: Too many closing brackets, you silly mf LOL\n", SYNTAX_ERROR);
                         return INFINITY;
-
-                    cur_op.type = OPRAND;
-                    cur_op.value = inner_result;
-
-                    addMultiplicationIfNeeded(list); // so 5(1+2) becomes 5*(1+2)
-                    i = end;
+                    }
+                    case ' ':
+                    {
+                        printf("%s: I told you we don't support spaces yes, but you COULDN'T listen. Shame.\n", SYNTAX_ERROR);
+                        return INFINITY;
+                    }
+                    default:
+                    {
+                        printf("%s: Unsupported character %c, what IS this, black magic?!\n", SYNTAX_ERROR, (int)cur_op.value);
+                        return INFINITY;
+                    }
                 }
                 break;
             }
@@ -269,13 +288,13 @@ int findClosingBracket(char* string, int index)
                     return index;
                 break;
             case '\0': case EOF:
-                printf("SYNTAX ERROR: Too many opening brackets");
+                printf("%s: Too many opening brackets\n", SYNTAX_ERROR);
                 return -1;
                 break;
             default:
                 break;
         }
     }
-    printf("SYNTAX ERROR: Too many closing brackets");
+    printf("%s: Too many closing brackets\n", SYNTAX_ERROR);
     return -1;
 }

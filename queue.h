@@ -128,36 +128,20 @@ int queueSize(Queue queue)
     return queue->size;
 }
 
-// Prints a queue in the next format:
-// **********************
-// Showing history:
-// 4. 5+8*9
-// 3. 1+1
-// 2. -5
-// 1. sin(-3/2pi)
-// **********************
+// Prints a queue in the next format (but prettified):
+// 4. 5+8*9 = 77
+// 3. 1+1 = 2
+// 2. -5 = -5
+// 1. sin(-3/2pi) = 1
 void queuePrint(Queue queue)
 {
-    printf("*********************\n");
-    printf("                     \n");
-    printf("showing history:     \n");    
-    if (queue == NULL || queue->size == 0)
-        printf("No history.\n");
-    else
-    {
-        int i = queue->size;
-        for (qNode* ptr = queue->front; ptr != NULL; ptr = ptr->next)
-            printf("%d. %s\n", i--, ptr->string);
-    }
-    printf("                     \n");
-    printf("*********************\n");
-}
-
-void queuePrint2(Queue queue)
-{
     if (queue == NULL || queue->size == 0)
     {
-        printf("No history.\n");
+        char result[7 * 22];
+        char lines[1][MAX_LENGTH];
+        strcpy(lines[0], "No history.\n");
+        makeItCool(result, lines, 1, 12);
+        printf("%s\n", result);
         return;
     }
 
@@ -189,7 +173,6 @@ static qNode* qNodeCreate(char* expression, double result)
     *(node->string + i++) = '=';
     *(node->string + i++) = ' ';
     for (int j = 0; (*(node->string + i) = *(res + j)) != '\0'; i++, j++);
-    //node->expression = strcpy(node->expression, expression);
     node->next = NULL;
 
     return node;

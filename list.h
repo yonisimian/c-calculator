@@ -106,7 +106,7 @@ static void calculateFunctions(List list)
             // check for errors
             if (ptr->next == NULL || ptr->next->data.type != OPRAND)
             {
-                    printf("SYNTAX ERROR: you must put an oprand after a function, my dude.\n");
+                    printf("%s: you must put an oprand after a function, my dude.\n", SYNTAX_ERROR);
                     forceError(list);
                     return;
             }
@@ -121,7 +121,7 @@ static void calculateFunctions(List list)
                 case LN:   ptr->data.value = log(ptr->next->data.value); break;
                 case ABS:  ptr->data.value = (ptr->next->data.value < 0) ? -(ptr->next->data.value) : ptr->next->data.value; break;           
                 default:
-                    printf("CODING ERROR: you shouldn't have reached here. My mistake :(\n");
+                    printf("%s: you shouldn't have reached here. My mistake :|\n", CODING_ERROR);
                     forceError(list);
                     return;
             }
@@ -144,10 +144,31 @@ static void calculateUnOp(List list)
 
         if (op.type == OPERATOR)
         {
+            // checking for errors first
+            if (ptr->next == NULL)
+            {
+                printf("%s: you can't end with a %c, sire!\n", SYNTAX_ERROR, (int)ptr->data.value);
+                forceError(list);
+                return;
+            }
+
+            // no fatal errors
             switch ((int)op.value)
             {
                 case '!':
                 {
+                    if (ptr->prev->data.type != OPRAND)
+                    {
+                        printf("%s: ! works on oprands (numbers) only, babe ^^\n", SYNTAX_ERROR);
+                        forceError(list);
+                        return;
+                    }
+                    if (ptr->prev->data.value - (int)ptr->prev->data.value != 0)
+                    {
+                        printf("%s: ! works on integers only uwu\n", MATH_ERROR);
+                        forceError(list);
+                        return;
+                    }
                     ptr->prev->data.value = factorial(ptr->prev->data.value);
                     ptr = nodeRemove(list, ptr);
                     continue;
@@ -156,9 +177,9 @@ static void calculateUnOp(List list)
                 {
                     if (ptr->prev == NULL || ptr->prev->data.type != OPRAND)
                     {
-                        if (ptr->next == NULL || ptr->next->data.type != OPRAND)
+                        if (ptr->next->data.type != OPRAND)
                         {
-                            printf("SYNTAX ERROR: you must substract SOMETHING, fella.\n");
+                            printf("%s: you must substract SOMETHING, fella.\n", SYNTAX_ERROR);
                             forceError(list);
                         }
                         else // prev node isn't OPRAND, next node is OPRAND
@@ -198,6 +219,21 @@ static void calculateBinOp(List list, int round)
 
         if (op.type == OPERATOR)
         {
+            // checking for errors first
+            if (ptr->next == NULL || ptr->prev == NULL)
+            {
+                printf("%s: you can't begin or end with a %c, sire!\n", SYNTAX_ERROR, (int)ptr->data.value);
+                forceError(list);
+                return;
+            }
+            if (ptr->prev->data.type != OPRAND || ptr->next->data.type != OPRAND)
+            {
+                printf("%s: you must have oprands before and after your %c, honey ~:\n", SYNTAX_ERROR, (int)ptr->data.value);
+                forceError(list);
+                return;
+            }
+
+            // no errors
             switch (round)
             {
                 case 1:
@@ -214,8 +250,31 @@ static void calculateBinOp(List list, int round)
                     switch ((int)op.value)
                     {
                         case '*': ptr->prev->data.value *= ptr->next->data.value; break;
-                        case '/': ptr->prev->data.value /= ptr->next->data.value; break;
-                        case '%': ptr->prev->data.value = (int)(ptr->prev->data.value) % (int)(ptr->next->data.value); break;
+                        case '/':
+                        {
+                            // check for division by zero
+                            if (ptr->next->data.value - 0 == 0)
+                            {
+                                printf("%s: you can't divide by zero, m'lord.\n", MATH_ERROR);
+                                forceError(list);
+                                return;
+                            }
+                            ptr->prev->data.value /= ptr->next->data.value;
+                            break;
+                        }
+                        case '%':
+                        {
+                            // check for integers before and after
+                            if (ptr->prev->data.value != (int)ptr->prev->data.value || ptr->next->data.value != (int)ptr->next->data.value
+                                    || ptr->prev->data.value < 0 || ptr->next->data.value <= 0)
+                            {
+                                printf("%s: modulu (%%) works only on positive integers, m'lady.\n", MATH_ERROR);
+                                forceError(list);
+                                return;
+                            }
+                            ptr->prev->data.value = (int)(ptr->prev->data.value) % (int)(ptr->next->data.value);
+                            break;
+                        }
                         default:  ptr = ptr->next; continue;
                     }
                     break;
@@ -230,6 +289,10 @@ static void calculateBinOp(List list, int round)
                     }
                     break;
                 }
+                default:
+                    printf("%s: developer did something stupid, abort ABORT.\n", CODING_ERROR);
+                    forceError(list);
+                    return;
             }
 
             // we've reached here only if we encountered an operation. 
@@ -328,7 +391,7 @@ void listPrint(List list)
     if (list->head == NULL)
     {
         if (list->size != 0)
-            printf("CODING ERROR: Something's wrong, I can feel it. list's size is %d but head is NULL.\n", list->size);
+            printf("%s: Something's wrong, I can feel it. list's size is %d but head is NULL.\n", CODING_ERROR, list->size);
 
         printf("[]\n");
             return;
@@ -368,7 +431,7 @@ void listPrint2(List list)
     if (list->head == NULL)
     {
         if (list->size != 0)
-            printf("CODING ERROR: Something's wrong, I can feel it. list's size is %d but head is NULL.\n", list->size);
+            printf("%s: Something's wrong, I can feel it. list's size is %d but head is NULL.\n", CODING_ERROR, list->size);
 
         printf("[]\n");
             return;
