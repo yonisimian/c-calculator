@@ -66,7 +66,7 @@ OpType getType(char* string, int index);
 int getWord(char* word);
 char* substring(char string[], int start, int length);
 double substringToDouble(char string[], int start, int length);
-void removeSpaces(char* string);
+void reduceSpaces(char* string);
 int factorial(int num);
 
 char* generateHelpTitle(void);
@@ -132,15 +132,18 @@ double substringToDouble(char* string, int start, int end)
     return atof(s);
 }
 
-// Remove all spaces from a string.
-// NOTE: strings like "6  5" become "65".
-void removeSpaces(char* string)
+// Reduce each space group in a string to one space.
+void reduceSpaces(char* string)
 {
     const char* s = string;
-    do {
-        while (*s == ' ')
-            ++s;
-    } while ((*string++ = *s++));
+    while (*s == ' ' && *s != '\0')
+        s++;
+    while ((*string++ = *s++) != '\0')
+    {
+        if ((*string++ = *s++) == ' ')
+            while (*s == ' ')
+                ++s;
+    }
 }
 
 // Calculates the factorial of a non-negative number

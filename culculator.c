@@ -25,7 +25,6 @@ int quitProgram(void);
 
 /*
     TODO:
-        - handle spaces
         - seperate headers and implementation
 */
 int main()
@@ -38,7 +37,7 @@ int main()
     printf("%s\n", HELP_TITLE);
 
     // Declarations
-    int another = 1; // Continue if we want another culculation
+    int another = 1;             // Continue if we want another culculation
     char expression[MAX_LENGTH]; // The expression to calculate
     history = queueCreate();
 
@@ -92,7 +91,8 @@ void getExpression(char* expression)
 // If the expression is valid, the error core "NO_ERROR" will be returned.
 ErrorCode validate(char* expression)
 {
-    //removeSpaces(expression);
+    reduceSpaces(expression);
+    printf("%s\n", expression);
     if ((int)strlen(expression) > MAX_LENGTH)
         return TOO_LONG;
 
@@ -179,6 +179,7 @@ double calculate(char* expression, int* another)
                 {
                     cur_op.type = FUNCTION;
                     cur_op.value = value;
+                    addMultiplicationIfNeeded(list); // so 5sin(pi) becomes 5*sin(pi) 
                 }
 
                 // constants: E, PI, PHI,   storage variables: X, Y, Z, ANS
@@ -211,6 +212,8 @@ double calculate(char* expression, int* another)
             {
                 switch ((int)cur_op.value)
                 {
+                    case ' ':
+                        continue;
                     case '(':
                     {
                         int end = findClosingBracket(expression, i);
@@ -231,11 +234,6 @@ double calculate(char* expression, int* another)
                     case ')':
                     {
                         printf("%s: Too many closing brackets, you silly mf LOL\n", SYNTAX_ERROR);
-                        return INFINITY;
-                    }
-                    case ' ':
-                    {
-                        printf("%s: I told you we don't support spaces yes, but you COULDN'T listen. Shame.\n", SYNTAX_ERROR);
                         return INFINITY;
                     }
                     case '=':

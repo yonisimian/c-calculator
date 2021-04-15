@@ -2,18 +2,18 @@
 This is a culculator program.
 
 Write an expression using the next operations: + - * / % ^ !
-Write ans for the value of the last calculation.
-You can use the constants e, pi, phi anytime you'd like.
-You can use the functions sin, cos, tan, sqrt, log, ln, abs.
-You can use 3 manually assigned variables: x, y, z.
-Assign those variables by x=[expression], like "x=3pi".
+Write ANS for the value of the last calculation.
+You can use the constants E, PI, PHI anytime you'd like.
+You can use the functions SIN, COS, TAN, SQRT, LOG, LN, ABS.
+You can use 3 manually assigned variables: X, Y, Z.
+Assign those variables by X=[expression], like "X=3PI".
 
 Write HELP to view this message again.
 Write HISTORY to view the culculation history.
 Write QUIT to quit the program.
 
-The program is case-insensitive, so sin = SIN, pi = PI etc.
-The program is space-sensitive, do not use them please.
+The program is case-insensitive, so SIN = sin, PI = pi etc.
+The program is space-insensitive, use them freely (appropriatly).
 
 Enjoy!
 ---HELP TITLE END---

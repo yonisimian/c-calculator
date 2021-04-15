@@ -88,10 +88,12 @@ void listCalculate(List list)
     calculateBinOp(list, 2);    // recuces multiplications, divitions, and modulus.
     calculateBinOp(list, 3);    // reduces additions and substructions.
 
-    // all culculations should have reduces to the first node in the list
+    // each expression should reduce to 1 node
+    // so if there's more than 1 node, probably an unappropriate space was entered.
     if (list->size > 1)
     {
-        printf("%s: culculation gone wrong, hit developer for more information.\n", CODING_ERROR);
+        //printf("%s: culculation gone wrong, hit developer for more information.\n", CODING_ERROR);
+        printf("%s: more than 1 expression was entered (check for unappropriate spaces)\n", SYNTAX_ERROR);
         forceError(list);
         return;
     }
@@ -119,6 +121,20 @@ static void calculateFunctions(List list)
                     printf("%s: you must put an oprand after a function, my dude.\n", SYNTAX_ERROR);
                     forceError(list);
                     return;
+            }
+
+            if (ptr->next->data.value <= 0 && (op.value == LOG || op.value == LN))
+            {
+                printf("%s: Remember! log and ln can only operate on positive values.\n", MATH_ERROR);
+                forceError(list);
+                return;
+            }
+            
+            if (ptr->next->data.value < 0 && op.value == SQRT)
+            {
+                printf("%s: Remember! sqrt can only operate on non-negative values.\n", MATH_ERROR);
+                forceError(list);
+                return;
             }
 
             switch((int)op.value)
