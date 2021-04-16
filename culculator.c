@@ -92,7 +92,6 @@ void getExpression(char* expression)
 ErrorCode validate(char* expression)
 {
     reduceSpaces(expression);
-    printf("%s\n", expression);
     if ((int)strlen(expression) > MAX_LENGTH)
         return TOO_LONG;
 
