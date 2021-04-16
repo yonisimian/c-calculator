@@ -77,6 +77,8 @@ E--prev-->D
 E--next-->W[NULL]
 ```
 
+>If a graph isn't viewed, use this extension: https://github.com/BackMarket/github-mermaid-extension
+
 - First scans of finding functions and operators as ``!`` and ``^`` do nothing.
 - The scan to find ``*``, ``/`` and ``%`` stops at the for node, which is ``*``.
 The calculation *2 x 30* is being done and stored in the prev node of ``*`` while the ``*`` and ``30`` are released from the list, so the linked list now looks like this: 
