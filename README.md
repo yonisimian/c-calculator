@@ -79,8 +79,8 @@ E--next-->W[NULL]
 
 >If a graph isn't viewed, use this extension: https://github.com/BackMarket/github-mermaid-extension
 
-- First scans of finding functions and operators as ``!`` and ``^`` do nothing.
-- The scan to find ``*``, ``/`` and ``%`` stops at the for node, which is ``*``.
+- The first scans of finding functions and operators (as ``!`` and ``^``) do nothing.
+- The scan to find ``*``, ``/`` and ``%`` stops at the four node, which is ``*``.
 The calculation *2 x 30* is being done and stored in the prev node of ``*`` while the ``*`` and ``30`` are released from the list, so the linked list now looks like this: 
 ```mermaid
 graph LR
@@ -115,24 +115,24 @@ If an error occurs during the expression calculation itself, an error message wi
 
 ###  Notes
 - There are 4 ``.c`` files in the solution:
-	- *calculator.c*, which has the main algorithm and functions.
-	- *utils.c*, which has the ``#define``s and more utility functions.
-	- *list.c*, which is the linked list ADT (and also calculates the expression).
-	- *queue.c*, which is the queue data structure for the history of calculations.
+	- ``calculator.c``, which has the main algorithm and functions.
+	- ``utils.c``, which holds the ``#define``s and more utility functions.
+	- ``list.c``, which is the linked list ADT (and also calculates the expression).
+	- ``queue.c``, which is the queue data structure for the history of calculations.
 - The program also handles reading data from files, and if the ``titles.txt`` file is missing or changed - the program won't run.
 - All of the possible words, Op types and errors are stored in *enums*.
 - When checking for letters and words I decided to check it NOT case-sensitive, so that the program will become more user friendly (either pi, PI or Pi equal 3.14).
-- I have tried not to pass time and space complexity of O(n), and the usage of queue for that one simple purpose (a list of history calculations) is net for efficiency (O(1)).
+- I have tried not to exceed time and space complexity of O(n), and the usage of the queue for that one simple purpose (a list of history calculations) is solely for efficiency (O(1)).
 
 ## Summary
-The calculator's purpose was helping me learn the C language, so when I could use std functions I DID use them as they are essential for learning the language (in my opinion).
+The calculator's purpose was helping me learn the C language, so when I could use std functions I DID use them - as they are essential for learning the language (in my opinion).
 
-Only when I had to I've  created my own functions, because the program for me is NOT about how to calculate sin and cos (although it might be interesting to implement a Taylor series for calculating sin by myself), but about **developing** a program in C and use the tools I never touched before like pointer and structs.
+Only when I had to I've created my own functions, because the program for me is NOT about how to calculate sin and cos (although it might be interesting to implement a Taylor series for calculating sin by myself), but about **developing** a program in C and use the tools I never touched before - like pointers and structs.
 
-However, I did find it interesting to generate my own ADTs (linked list and queue) instead of copying them from the internet, because it served the purpose of learning C (I did write ADTs before but as classes and not structs). 
+However, I did find it interesting to generate my own ADTs (linked list and queue) instead of copying them from the internet, because it served the purpose of learning C (writing ADTs as structs and not classes was new for me). 
 
-*If you made it all the way to here I have to say I appreciate you a lot!
-You are more than welcomed to contact me and tell your thoughts about the program :)*
+*If you made it all the way to here I have to say that I appreciate you a lot!
+You are more than welcome to contact me and tell your thoughts about the program :)*
 
 Yehonatan Simian, 2021 Ⓒ
 yonisimian@gmail.com
