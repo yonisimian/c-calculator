@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <conio.h>
+#include <math.h>
+
 #include "utils.h"
 #include "list.h"
 #include "queue.h"
@@ -10,9 +12,15 @@ Queue history;
 char* HELP_TITLE;
 char* QUIT_TITLE;
 
+double variable_x = 0;
+double variable_y = 0;
+double variable_z = 0;
+double variable_ans = 0;
+
 void getExpression(char* expression);
 enum ErrorCode validate(char* expression);
 int isAssignment(char* expression);
+
 double calculate(char* expression, int* another);
 void addMultiplicationIfNeeded(List list);
 void addZeroBeforeMinus(List list);
@@ -23,10 +31,6 @@ int findClosingBracket(char* string, int index);
 
 int quitProgram(void);
 
-/*
-    TODO:
-        - seperate headers and implementation
-*/
 int main()
 {
     // importing titles
@@ -52,10 +56,9 @@ int main()
                 double result = calculate(expression, &another);
                 if (result != INFINITY)
                 {
-                    if(result < 0.000000001 && result > -0.000000001)
-                        result = 0;
                     printf("The result is: %g\n", result);
                     enqueue(history, expression, result);
+                    variable_ans = result;
                 }
                 break;
             }
@@ -255,6 +258,14 @@ double calculate(char* expression, int* another)
     // Calculate list
     listCalculate(list);
     result = listGet(list, 0)->value;
+
+    // rounding the result 
+    if (result != INFINITY)
+    {
+        double epsilon = result - (int)result;
+        if (epsilon < 0.000000001) result = (int)result;
+        if (epsilon > 0.999999999) result = (int)(result + 1);
+    }
 
     listDestroy(list);
 
