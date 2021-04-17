@@ -1,4 +1,4 @@
 CMakeLists.txt
 build/
 .vscode/
-.gitignore
+gitignore
