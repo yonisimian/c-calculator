@@ -3,33 +3,50 @@
 
 #include "utils.h"
 
-typedef struct Node
-{
-    Op data;
-    struct Node* next;
-    struct Node* prev;
-} Node;
+typedef struct List *List;
 
-typedef struct List
-{
-    Node* head;
-    int size;
-} *List;
-
+/** Create a new empty linked list, and return it's pointer. */
 List listCreate(void);
+
+/** Add an item (op) to the end of the list.
+ *  Returns the number of successfully added items. */
 int listAdd(List list, Op op);
+
+/** Calculate every operation in the list by the correct order of operations.
+ * Reduces the list so that the answer is in the first and only node.
+ * NOTE: if a calculation error occured, the answer will be INFINITY.
+ * NOTE: if (list's size > 1) after the calculation, the expression was illegal. */ 
 void listCalculate(List list);
+
+/** Return the Node's data (Op) at a specific index */
 Op* listGet(List list, int index);
+
+/** Remove an item at a specific index in the list.
+ * Returns the number of successfully removed items. */
 int listRemoveAt(List list, int index);
+
+/** Remove and free a list and it's nodes. */
 void listDestroy(List list);
+
+/** Return the size of a list.
+ * NOTE: if the list is NULL, 0 will be returned. */
 int listSize(List list);
+
+/** Print a list in the next format:
+ * [1, *, 3, +, 69, 420, !]
+ * NOTE: made for debugging purposes. */
 void listPrint(List list);
+
+/** Print a list in the next format:
+ * List of size 5:
+ * Op 1 - OPRAND - 1
+ * Op 2 - OPERATOR - +
+ * Op 3 - OPRAND - 69
+ * Op 4 - OPERATOR - *
+ * Op 5 - OPRAND - 420
+ * End of list.
+ * NOTE: made for debugging purposes.
+ **/
 void listPrint2(List list);
-static void printOp(int index, Op* op);
-static void calculateFunctions(List list);
-static void calculateUnOp(List list);
-static void calculateBinOp(List list, int round);
-static void forceError(List list);
-static Node* nodeRemove(List list, Node* node);
 
 #endif

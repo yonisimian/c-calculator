@@ -1,7 +1,7 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
-#define MAX_LENGTH 100 // The maximum length of an expression
+#define MAX_LENGTH 256 // The maximum length of an expression
 #define TITLES_FILE_NAME "titles.txt" // for reading titles
 #define BORDER_CHAR '#'
 
@@ -51,15 +51,32 @@ typedef struct Op
     double value;
 } Op;
 
+/** Get the type of the character in a specific index */
 OpType getType(char* string, int index);
+
+/** Return the word's enum value if recognized.
+ * NOTE: unrecognized words return UNKNOWN (=0). */
 int getWord(char* word);
+
+/** Return the substring of "string" from "start" to ("end" - 1)
+ * NOTE: remember to free after usage!  */
 char* substring(char string[], int start, int length);
+
+/** Convert substring to double (inclusive)
+ * WARNING: NO VALIDATION! */
 double substringToDouble(char string[], int start, int length);
+
+/** Reduce each space group in a string into one space. */
 void reduceSpaces(char* string);
+
+/** Calculate the factorial of a non-negative number. */
 int factorial(int num);
 
 char* generateHelpTitle(void);
 char* generateQuitTitle(void);
+
+/** Take an array of lines, add a border and put the result to dest.
+ * NOTE: must be handled carefully. */
 void makeItCool(char dest[], char lines[][MAX_LENGTH], int num_of_lines, int line_length);
 
 #endif

@@ -5,14 +5,26 @@
 #include <stdlib.h>
 #include "utils.h"
 
-static void printOp(int index, Op* op);
+typedef struct Node
+{
+    Op data;
+    struct Node* next;
+    struct Node* prev;
+} Node;
+
+typedef struct List
+{
+    Node* head;
+    int size;
+} *List;
+
 static void calculateFunctions(List list);
 static void calculateUnOp(List list);
 static void calculateBinOp(List list, int round);
 static void forceError(List list);
+static void printOp(int index, Op* op);
 static Node* nodeRemove(List list, Node* node);
 
-// Creates a new empty linked list
 List listCreate(void)
 {
     List list = malloc(sizeof(*list));
@@ -25,8 +37,6 @@ List listCreate(void)
     return list;
 }
 
-// Adds an item to the end of the list.
-// Returns the number of successfully added items.
 int listAdd(List list, Op op)
 {
     if (list == NULL)
@@ -54,9 +64,6 @@ int listAdd(List list, Op op)
     return 1;
 }
 
-// Calculates every operation in the list by the correct order of operations.
-// Reduces the list so that the answer is in the first and only node.
-// NOTE: if (list->size > 1) after the calculation, the expression was illegal. 
 void listCalculate(List list)
 {
     if (list == NULL || list->size == 0)
@@ -79,6 +86,8 @@ void listCalculate(List list)
     }
 }
 
+/** calculates functions: sin cos etc.
+ * NOTE: calculates from right to left (of the expression) */
 static void calculateFunctions(List list)
 {
     Node* ptr = list->head;
@@ -137,8 +146,8 @@ static void calculateFunctions(List list)
     }
 }
 
-// calculates unary opertors: ! and -
-// NOTE: - must be calculated here so 5^-1 will be legal expression.
+/** calculates unary opertors: ! and -
+ * NOTE: (-) must be calculated here so 5^-1 will be a legal expression. */
 static void calculateUnOp(List list)
 {
     Node* ptr = list->head;
@@ -210,10 +219,11 @@ static void calculateUnOp(List list)
     }
 }
 
-// calculates binary operators in the list.
-// round 1 - calculates ^
-// round 2 - calculates *, /, %
-// round 3 - calculates +, -
+/** calculates binary operators in the list.
+ * round 1 - calculates ^
+ * round 2 - calculates *, /, %
+ * round 3 - calculates +, -
+ **/
 static void calculateBinOp(List list, int round)
 {
     Node* ptr = list->head;
@@ -309,8 +319,7 @@ static void calculateBinOp(List list, int round)
             ptr = ptr->next;
     }
 }
-
-// Returns the Op of the Node at a specific index 
+ 
 Op* listGet(List list, int index)
 {
     if (list == NULL || index < 0 || index >= list->size)
@@ -324,8 +333,6 @@ Op* listGet(List list, int index)
     return &ptr->data;
 }
 
-// Removes an item at a specific index in the list.
-// Returns the number of successfully removed items.
 int listRemoveAt(List list, int index)
 {
     if (list == NULL || index < 0 || index >= list->size)
@@ -382,8 +389,6 @@ int listSize(List list)
     return list->size;
 }
 
-// Prints a list in the next format:
-// [1, *, 3, +, 69, 420, !]
 void listPrint(List list)
 {
     if (list == NULL)
@@ -416,14 +421,6 @@ void listPrint(List list)
     printf("\b\b]\n");
 }
 
-// Prints a list in the next format:
-// List of size 5:
-// Op 1 - OPRAND - 1
-// Op 2 - OPERATOR - +
-// Op 3 - OPRAND - 69
-// Op 4 - OPERATOR - *
-// Op 5 - OPRAND - 420
-// End of list.
 void listPrint2(List list)
 {
     if (list == NULL)
@@ -449,8 +446,8 @@ void listPrint2(List list)
     printf("End of list.\n");
 }
 
-// Prints node's values in the next format:
-// Op 1 - type OPRAND, value 5.5
+/** Print node's values in the next format:
+ * Op 1 - type OPRAND, value 5.5 */
 static void printOp(int index, Op* op)
 {
     char types[3][10] = { "UNKNOWN", "OPRAND", "OPERATOR" };
@@ -460,8 +457,8 @@ static void printOp(int index, Op* op)
         printf("Op %d - type %s, value %g\n", index, types[op->type], op->value);
 }
 
-// Forces an error (to be used after an error has been found).
-// takes any list and convert it to list one node with value INFINITY
+/** Forces an error (to be used after an error has been found).
+ * Takes any list and convert it to list one node with value INFINITY. */
 static void forceError(List list)
 {
     listDestroy(list);
@@ -469,10 +466,10 @@ static void forceError(List list)
     listAdd(list, (Op){ .type = OPRAND, .value = INFINITY });
 }
 
-// C'mon tis not need for eggsplenashen
-// okOK, it removes a node and connect the prev to the next.
-// Oh, and it returns a pointer to the next node.
-// NOTE: I'm assuming that node is in this specific list!
+/** C'mon tis not need for eggsplenashen
+ * okOK, it removes a node and connect the prev to the next.
+ * Oh, and it returns a pointer to the next node.
+ * NOTE: I'm assuming that node is in this specific list! */
 static Node* nodeRemove(List list, Node* node)
 {
     if (node == NULL)

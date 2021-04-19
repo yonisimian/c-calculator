@@ -5,9 +5,24 @@
 #include <stdio.h>
 #include "utils.h"
 
+typedef struct qNode
+{
+    char string[MAX_LENGTH * 2]; //more length for the result.
+    struct qNode* next;
+} qNode;
+
+typedef struct Queue
+{
+    qNode* front;
+    qNode* rear;
+    int size;
+    int longest_node; // the length of the longest node's data
+} *Queue;
+
+/** Create a node whose data is in the next format:
+ * "<expression> = <result>" */
 static qNode* qNodeCreate(char* expression, double result);
 
-// Creates a new empty queue
 Queue queueCreate(void)
 {
     Queue queue = (Queue)malloc(sizeof(Queue));
@@ -22,8 +37,6 @@ Queue queueCreate(void)
     return queue;
 }
 
-// Adds an item to the end of the queue.
-// Returns the number of successfully added items.
 int enqueue(Queue queue, char* expression, double result)
 {
     if (queue == NULL)
@@ -50,7 +63,6 @@ int enqueue(Queue queue, char* expression, double result)
     return 1;
 }
 
-// Pops the front of a queue
 void dequeue(Queue queue)
 {
     if (queue == NULL || queue->size == 0)
@@ -104,11 +116,6 @@ int queueSize(Queue queue)
     return queue->size;
 }
 
-// Prints a queue in the next format (but prettified):
-// 4. 5+8*9 = 77
-// 3. 1+1 = 2
-// 2. -5 = -5
-// 1. sin(-3/2pi) = 1
 void queuePrint(Queue queue)
 {
     if (queue == NULL || queue->size == 0)

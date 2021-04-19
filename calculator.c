@@ -18,10 +18,11 @@ double variable_z = 0;
 double variable_ans = 0;
 
 void getExpression(char* expression);
-enum ErrorCode validate(char* expression);
+enum ErrorCode validate(char* expression, int* another);
+int isUserCommand(char* expression, int* another);
 int isAssignment(char* expression);
 
-double calculate(char* expression, int* another);
+double calculate(char* expression);
 void addMultiplicationIfNeeded(List list);
 void addZeroBeforeMinus(List list);
 
@@ -41,7 +42,7 @@ int main()
     printf("%s\n", HELP_TITLE);
 
     // Declarations
-    int another = 1;             // Continue if we want another culculation
+    int another = 1;             // Continue if we want another calculation
     char expression[MAX_LENGTH]; // The expression to calculate
     history = queueCreate();
 
@@ -49,11 +50,11 @@ int main()
     while (another)
     {
         getExpression(expression);
-        switch (validate(expression))
+        switch (validate(expression, &another))
         {
             case NO_ERROR:
             {
-                double result = calculate(expression, &another);
+                double result = calculate(expression);
                 if (result != INFINITY)
                 {
                     printf("The result is: %g\n", result);
@@ -80,20 +81,24 @@ int main()
     return quitProgram();
 }
 
-
-
-// Get the expression from the user to the variable "expression"
+/** Get the expression from the user to the variable "expression" */
 void getExpression(char* expression)
 {
     printf("Please insert an expression to calculate: ");
     gets(expression);
-    //scanf("%s", expression);
 }
 
-// Check the validity of an expression, and return the proper error code.
-// If the expression is valid, the error core "NO_ERROR" will be returned.
-ErrorCode validate(char* expression)
+/** Check the validity of an expression, and return the proper error code.
+ * If the expression is valid, the error core "NO_ERROR" will be returned.
+ * Set "another" to 0 if user chose to quit. */
+ErrorCode validate(char* expression, int* another)
 {
+    if (expression == NULL || strlen(expression) < 1)
+        return SILENT_ERROR;
+
+    if (isUserCommand(expression, another))
+        return SILENT_ERROR;
+
     reduceSpaces(expression);
     if ((int)strlen(expression) > MAX_LENGTH)
         return TOO_LONG;
@@ -101,21 +106,43 @@ ErrorCode validate(char* expression)
     int is_assignment = isAssignment(expression);
     if (is_assignment == 1)
         return IS_ASSIGNMENT;
-    else if (is_assignment == -1) // is assignment, but gone wrong. error will tell what happened.
+    else if (is_assignment == -1) // is assignment, but gone wrong. error message will tell what happened.
         return SILENT_ERROR;
     
     return NO_ERROR;
 }
 
+/** Check if the input is HELP, HISTORY or QUIT.
+ * Set "another" to 0 if user chose to quit. */
+int isUserCommand(char* expression, int* another)
+{
+    char c = *expression;
+    if ((!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))) || strlen(expression) > 10) // if not a letter or len > 10
+        return 0;
+
+    switch (getWord(expression))
+    {
+        case HELP:    printf("%s\n", HELP_TITLE); return 1;
+        case HISTORY: queuePrint(history);        return 1;
+        case QUIT:    *another = 0;               return 1;
+        default:
+            return 0;
+    }
+}
+
+/** Check if the expression is accually an assignment (of storage variables).
+ * Returns  1 if it is an assignment.
+ * Returns  0 if it is NOT an assignment.
+ * Returns -1 if it is an assignment, but gone wrong (example "x = 5+").
+ **/
 int isAssignment(char* expression)
 {
-    if (expression == NULL || strlen(expression) < 3 || *(expression + 1) != '=' ||
+    if (strlen(expression) < 3 || *(expression + 1) != '=' ||
     (*(expression) != 'x' && *(expression) != 'X' && *(expression) != 'y' && *(expression) != 'Y' && *(expression) != 'z' && *(expression) != 'Z'))
         return 0; // this is not an assignment
 
-    int dummy = 0;
     expression += 2;
-    double result = calculate(expression, &dummy);
+    double result = calculate(expression);
     if (result == INFINITY)
         return -1;
     
@@ -130,9 +157,11 @@ int isAssignment(char* expression)
     }
 }
 
-// calculates "expression" and prints result
-// sets "another" to 0 if user chose to quit.
-double calculate(char* expression, int* another)
+/** --- Main Algorithm ---
+ * Calculate "expression" and return the result.
+ * NOTE: if an error occures, an error message will be printed the INFINITY will be returned.
+ **/
+double calculate(char* expression)
 {
     // Declerations
     List list = listCreate();
@@ -165,14 +194,7 @@ double calculate(char* expression, int* another)
                 // commands: HELP, HISTORY, QUIT
                 if (value >= HELP && value < SIN)
                 {
-                    if (strlen(word) == strlen(expression))
-                    {
-                        if (value == HELP) printf("%s\n", HELP_TITLE);
-                        else if (value == HISTORY) queuePrint(history);
-                        else *another = 0;
-                    }
-                    else
-                        printf("The words HELP, HISTORY and QUIT must come alone and not inside an expression.\n");
+                    printf("The words HELP, HISTORY and QUIT must come alone and not inside an expression.\n");
                     return INFINITY;
                 }
 
@@ -220,7 +242,7 @@ double calculate(char* expression, int* another)
                     {
                         int end = findClosingBracket(expression, i);
                         char* inner_expression = substring(expression, i + 1, end);
-                        double inner_result = calculate(inner_expression, another);
+                        double inner_result = calculate(inner_expression);
                         free(inner_expression);
 
                         if (end < 1)
@@ -272,10 +294,10 @@ double calculate(char* expression, int* another)
     return result;
 }
 
-// adding * if needed so 5PI will become 5*PI = 5 * 3.14
+/** Add (*) if needed so 5PI will become 5*PI (= 5 * 3.14) */
 void addMultiplicationIfNeeded(List list)
 {
-    int size = list->size;
+    int size = listSize(list);
     if (size > 0)
     {
         Op last_op = *listGet(list, size - 1);
@@ -287,21 +309,21 @@ void addMultiplicationIfNeeded(List list)
     }
 }
 
-// adding 0 if needed so -5 will become (0-5)
+/** Add 0 if needed so -5 will become (0-5) */
 void addZeroBeforeMinus(List list)
 {
-    if (list->size == 0)
+    if (listSize(list) == 0)
         listAdd(list, (Op){ .type = OPRAND, .value = 0 });
     else
     {
-        Op last_op = *listGet(list, list->size - 1);
+        Op last_op = *listGet(list, listSize(list) - 1);
         if (last_op.type != OPRAND)
             listAdd(list, (Op){ .type = OPRAND, .value = 0 });
     }
 }
 
-// Find last digit of a number starts in "index"
-// NOTE: can return index of a point, since atof can handle it.
+/** Find the last digit of a number starts in "index"
+ * NOTE: can return index of a point, since atof can handle it. */
 int findEndOfNumber(char* string, int index)
 {
     while (getType(string, ++index) == OPRAND);
@@ -311,7 +333,7 @@ int findEndOfNumber(char* string, int index)
     return index - 1;
 }
 
-// Find last letter of a word starts in "index"
+/** Find the last letter of a word starts in "index" */
 int findEndOfWord(char* string, int index)
 {
     while (getType(string, ++index) == LETTER);
@@ -319,7 +341,7 @@ int findEndOfWord(char* string, int index)
     return index - 1;
 }
 
-// Find index of a bracket that closes the bracket in "index"
+/** Find index of a bracket that closes the bracket in "index" */
 int findClosingBracket(char* string, int index)
 {
     int opening_brackets = 1;
@@ -347,7 +369,7 @@ int findClosingBracket(char* string, int index)
     return -1;
 }
 
-// quits the program ellegantly (did I write it right? or left? :\)
+/** Quit the program ellegantly (did I write it right? or left? :\) **/
 int quitProgram(void)
 {
     printf("Press any key to continue...");

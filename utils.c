@@ -8,7 +8,6 @@
 static char* WORDS[] = {"help", "history", "quit", "sin", "cos", "tan", "sqrt", "log", "ln", "abs", "e", "pi", "phi", "x", "y", "z", "ans"}; 
 static char* generateTitle(const char* from, const char* to);
 
-// Get the type of the character in a specific index
 OpType getType(char* string, int index)
 {
     char c = *(string + index);
@@ -29,8 +28,6 @@ OpType getType(char* string, int index)
     }
 }
 
-// Returns the word's enum value if recognized.
-// NOTE - unrecognized words return UNKNOWN (=0).
 int getWord(char* word)
 {
     for (int i = 0; i <= Z; i++)
@@ -40,8 +37,6 @@ int getWord(char* word)
     return UNKNOWN;
 }
 
-// Returns the substring of "string" from "start" to ("end" - 1)
-// NOTE: remember to free after usage! 
 char* substring(char string[], int start, int end)
 {
     char* a = (char*)malloc((end - start + 1) * sizeof(char));
@@ -53,8 +48,6 @@ char* substring(char string[], int start, int end)
     return a;
 }
 
-// Convert substring to double (inclusive)
-// WARNING: NO VALIDATION!
 double substringToDouble(char* string, int start, int end)
 {
     char s[end - start + 2];
@@ -66,7 +59,6 @@ double substringToDouble(char* string, int start, int end)
     return atof(s);
 }
 
-// Reduce each space group in a string to one space.
 void reduceSpaces(char* string)
 {
     const char* s = string;
@@ -80,7 +72,6 @@ void reduceSpaces(char* string)
     }
 }
 
-// Calculates the factorial of a non-negative number
 int factorial(int num)
 {
     if (num < 0)
