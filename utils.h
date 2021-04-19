@@ -8,6 +8,7 @@
 #define SYNTAX_ERROR "SYNTAX ERROR"
 #define MATH_ERROR   "MATH ERROR"
 #define CODING_ERROR "CODING ERROR"
+#define ERROR_VALUE INFINITY
 
 typedef enum ErrorCode
 {

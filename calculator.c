@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <conio.h>
 #include <math.h>
+#include <conio.h>
+#include <stdarg.h>
 
 #include "utils.h"
 #include "list.h"
@@ -30,6 +31,7 @@ int findEndOfNumber(char* string, int index);
 int findEndOfWord(char* string, int index);
 int findClosingBracket(char* string, int index);
 
+double error(int count, ...);
 int quitProgram(void);
 
 int main()
@@ -55,7 +57,7 @@ int main()
             case NO_ERROR:
             {
                 double result = calculate(expression);
-                if (result != INFINITY)
+                if (result != ERROR_VALUE)
                 {
                     printf("The result is: %g\n", result);
                     enqueue(history, expression, result);
@@ -143,7 +145,7 @@ int isAssignment(char* expression)
 
     expression += 2;
     double result = calculate(expression);
-    if (result == INFINITY)
+    if (result == ERROR_VALUE)
         return -1;
     
     expression -= 2;
@@ -159,7 +161,7 @@ int isAssignment(char* expression)
 
 /** --- Main Algorithm ---
  * Calculate "expression" and return the result.
- * NOTE: if an error occures, an error message will be printed the INFINITY will be returned.
+ * NOTE: if an error occures, an error message will be printed and ERROR_VALUE will be returned.
  **/
 double calculate(char* expression)
 {
@@ -187,15 +189,19 @@ double calculate(char* expression)
             case LETTER:
             {
                 int end = findEndOfWord(expression, i);
-                char* word = (char*)malloc(end + 1 - i);
-                word = substring(expression, i, end + 1);
+                char* word = substring(expression, i, end + 1);
+                if (word == NULL)
+                {
+                    printf("ERROR: Not enough memory to run this calculation. You may try again.\n");
+                    return error(1, list);
+                }
                 int value = getWord(word);
 
                 // commands: HELP, HISTORY, QUIT
                 if (value >= HELP && value < SIN)
                 {
                     printf("The words HELP, HISTORY and QUIT must come alone and not inside an expression.\n");
-                    return INFINITY;
+                    return error(2, list, word);
                 }
 
                 // functions: SIN, COS, TAN, SQRT, LOG, LN, ABS
@@ -222,12 +228,12 @@ double calculate(char* expression)
                     }
                     addMultiplicationIfNeeded(list); // so 5PI becomes 5*PI 
                 }
-
                 else
                 {
                     printf("%s: unknown word %s. Write HELP for more information.\n", SYNTAX_ERROR, word);
-                    return INFINITY;
+                    return error(2, list, word);
                 }
+                
                 free(word);
                 i = end;
                 break;
@@ -246,7 +252,7 @@ double calculate(char* expression)
                         free(inner_expression);
 
                         if (end < 1)
-                            return INFINITY;
+                            return error(1, list);
 
                         cur_op.type = OPRAND;
                         cur_op.value = inner_result;
@@ -258,17 +264,17 @@ double calculate(char* expression)
                     case ')':
                     {
                         printf("%s: Too many closing brackets, you silly mf LOL\n", SYNTAX_ERROR);
-                        return INFINITY;
+                        return error(1, list);
                     }
                     case '=':
                     {
                         printf("%s: '=' is not a valid character except for assignments (for x, y and z)\n", SYNTAX_ERROR);
-                        return INFINITY;
+                        return error(1, list);
                     }
                     default:
                     {
                         printf("%s: Unsupported character %c, what IS this, black magic?!\n", SYNTAX_ERROR, (int)cur_op.value);
-                        return INFINITY;
+                        return error(1, list);
                     }
                 }
                 break;
@@ -282,7 +288,7 @@ double calculate(char* expression)
     result = listGet(list, 0)->value;
 
     // rounding the result 
-    if (result != INFINITY)
+    if (result != ERROR_VALUE)
     {
         double epsilon = result - (int)result;
         if (epsilon < 0.000000001) result = (int)result;
@@ -367,6 +373,19 @@ int findClosingBracket(char* string, int index)
     }
     printf("%s: Too many closing brackets\n", SYNTAX_ERROR);
     return -1;
+}
+
+/** Get count and that number of arguments, free those arguments and return ERROR_VALUE
+ * NOTE: function does NOT check if argument is freeable! */ 
+double error(int count, ...)
+{
+    va_list list;
+    va_start(list, count);
+    for (int i = 0; i < count; i++)
+        free(va_arg(list, int));
+    va_end(list);
+
+    return ERROR_VALUE;
 }
 
 /** Quit the program ellegantly (did I write it right? or left? :\) **/

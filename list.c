@@ -458,12 +458,12 @@ static void printOp(int index, Op* op)
 }
 
 /** Forces an error (to be used after an error has been found).
- * Takes any list and convert it to list one node with value INFINITY. */
+ * Takes any list and convert it to list one node with value ERROR_VALUE. */
 static void forceError(List list)
 {
     listDestroy(list);
     list = listCreate();
-    listAdd(list, (Op){ .type = OPRAND, .value = INFINITY });
+    listAdd(list, (Op){ .type = OPRAND, .value = ERROR_VALUE });
 }
 
 /** C'mon tis not need for eggsplenashen

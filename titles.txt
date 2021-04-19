@@ -17,7 +17,6 @@ The program is space-insensitive, use them freely (appropriatly).
 
 Enjoy!
 ---HELP TITLE END---
-
 ---QUIT TITLE---
 Thanks for using my culculator program!
 ---QUIT TITLE END---
