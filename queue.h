@@ -1,10 +1,6 @@
 #ifndef QUEUE_H_
 #define QUEUE_H_
 
-#include "utils.h"
-
-#define MAX_HISTORY_COUNT 50
-
 typedef struct Queue *Queue;
 
 /** Create a new empty queue, and return it's pointer. */

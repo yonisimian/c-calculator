@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "utils.h"
+#include "defines.h"
 
 typedef struct qNode
 {

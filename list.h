@@ -1,7 +1,7 @@
 #ifndef LIST_H_
 #define LIST_H_
 
-#include "utils.h"
+#include "defines.h"
 
 typedef struct List *List;
 

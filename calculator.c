@@ -1,3 +1,16 @@
+/*
+	+-------------------------------------------------------------+
+	|                      C Calculator V1.0                      |
+	|                                                             |
+    | Author: Yehonatan Simian © 2021                             |
+    | Read README.md for additional information                   |
+    |                                                             |
+    | https://github.com/yonisimian                               |
+	+-------------------------------------------------------------+
+*/
+
+// ====================== includes ====================== //
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,21 +18,25 @@
 #include <conio.h>
 #include <stdarg.h>
 
-#include "utils.h"
 #include "list.h"
 #include "queue.h"
+#include "defines.h"
+
+// ====================== defines ====================== //
 
 Queue history;
 char* HELP_TITLE;
 char* QUIT_TITLE;
 
+// Storage variables
 double variable_x = 0;
 double variable_y = 0;
 double variable_z = 0;
 double variable_ans = 0;
 
+// main's functions
 void getExpression(char* expression);
-enum ErrorCode validate(char* expression, int* another);
+enum ErrorCode validateExpression(char* expression, int* another);
 int isUserCommand(char* expression, int* another);
 int isAssignment(char* expression);
 
@@ -27,13 +44,29 @@ double calculate(char* expression);
 void addMultiplicationIfNeeded(List list);
 void addZeroBeforeMinus(List list);
 
+// More utility functions for calculate()
 int findEndOfNumber(char* string, int index);
 int findEndOfWord(char* string, int index);
 int findClosingBracket(char* string, int index);
+OpType getType(char* string, int index);
+int getWord(char* word);
+static char* WORDS[] = {"help", "history", "quit", "sin", "cos", "tan", "sqrt", "log", "ln", "abs", "e", "pi", "phi", "x", "y", "z", "ans"}; 
+
+// Miscellaneous utility functions
+char* substring(char string[], int start, int length);
+double substringToDouble(char string[], int start, int length);
+void reduceSpaces(char* string);
+
+// Titles' i/o functions
+static char* generateTitle(const char* from, const char* to);
+char* generateHelpTitle(void);
+char* generateQuitTitle(void);
+void makeItCool(char dest[], char lines[][MAX_LENGTH], int num_of_lines, int line_length);
 
 double error(int count, ...);
 int quitProgram(void);
 
+// ====================== main ====================== //
 int main()
 {
     // importing titles
@@ -52,7 +85,7 @@ int main()
     while (another)
     {
         getExpression(expression);
-        switch (validate(expression, &another))
+        switch (validateExpression(expression, &another))
         {
             case NO_ERROR:
             {
@@ -82,8 +115,9 @@ int main()
 
     return quitProgram();
 }
+// ====================== end of main ====================== //
 
-/** Get the expression from the user to the variable "expression" */
+/** Get the expression input from the user */
 void getExpression(char* expression)
 {
     printf("Please insert an expression to calculate: ");
@@ -93,7 +127,7 @@ void getExpression(char* expression)
 /** Check the validity of an expression, and return the proper error code.
  * If the expression is valid, the error core "NO_ERROR" will be returned.
  * Set "another" to 0 if user chose to quit. */
-ErrorCode validate(char* expression, int* another)
+ErrorCode validateExpression(char* expression, int* another)
 {
     if (expression == NULL || strlen(expression) < 1)
         return SILENT_ERROR;
@@ -159,6 +193,7 @@ int isAssignment(char* expression)
     }
 }
 
+// ====================== calculate ====================== //
 /** --- Main Algorithm ---
  * Calculate "expression" and return the result.
  * NOTE: if an error occures, an error message will be printed and ERROR_VALUE will be returned.
@@ -218,9 +253,9 @@ double calculate(char* expression)
                     cur_op.type = OPRAND;
                     switch (value)
                     {
-                        case E:   cur_op.value = 2.71828182846; break;
-                        case PI:  cur_op.value = 3.14159265358; break;
-                        case PHI: cur_op.value = 1.61803398874; break;
+                        case E:   cur_op.value = e; break;
+                        case PI:  cur_op.value = pi; break;
+                        case PHI: cur_op.value = phi; break;
                         case X:   cur_op.value = variable_x;    break;
                         case Y:   cur_op.value = variable_y;    break;
                         case Z:   cur_op.value = variable_z;    break;
@@ -263,7 +298,7 @@ double calculate(char* expression)
                     }
                     case ')':
                     {
-                        printf("%s: Too many closing brackets, you silly mf LOL\n", SYNTAX_ERROR);
+                        printf("%s: Too many closing parentheses, you silly mf LOL\n", SYNTAX_ERROR);
                         return error(1, list);
                     }
                     case '=':
@@ -299,6 +334,7 @@ double calculate(char* expression)
 
     return result;
 }
+// ====================== end of calculate ====================== //
 
 /** Add (*) if needed so 5PI will become 5*PI (= 5 * 3.14) */
 void addMultiplicationIfNeeded(List list)
@@ -350,29 +386,208 @@ int findEndOfWord(char* string, int index)
 /** Find index of a bracket that closes the bracket in "index" */
 int findClosingBracket(char* string, int index)
 {
-    int opening_brackets = 1;
+    int opening_parentheses = 1;
     while (++index)
     {
         char c = *(string + index);
         switch (c)
         {
             case '(':
-                opening_brackets++;
+                opening_parentheses++;
                 break;
             case ')':
-                if (--opening_brackets == 0)
+                if (--opening_parentheses == 0)
                     return index;
                 break;
             case '\0': case EOF:
-                printf("%s: Too many opening brackets\n", SYNTAX_ERROR);
+                printf("%s: Too many opening parentheses\n", SYNTAX_ERROR);
                 return -1;
                 break;
             default:
                 break;
         }
     }
-    printf("%s: Too many closing brackets\n", SYNTAX_ERROR);
+    printf("%s: Too many closing parentheses\n", SYNTAX_ERROR);
     return -1;
+}
+
+/** Get the type of the character in a specific index */
+OpType getType(char* string, int index)
+{
+    char c = *(string + index);
+    switch (c)
+    {
+        case '+': case '-': case '*': case '/': case '%': case '!': case '^': return OPERATOR;
+        case '(': case ')': /*case '[': case ']': case '{': case '}':*/ return PARENTHESES;
+        default:
+        {
+            if (c >= '0' && c <= '9')
+                return OPRAND;
+            
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+                return LETTER;
+            
+            return UNKNOWN;
+        }
+    }
+}
+
+/** Return the word's enum value if recognized.
+ * NOTE: unrecognized words return UNKNOWN (=0). */
+int getWord(char* word)
+{
+    for (int i = 0; i <= Z; i++)
+        if (!strcasecmp(word, WORDS[i]))
+                return (i+1);
+
+    return UNKNOWN;
+}
+
+/** Return the substring of "string" from "start" to ("end" - 1)
+ * NOTE: remember to free after usage!  */
+char* substring(char string[], int start, int end)
+{
+    char* a = (char*)malloc((end - start + 1) * sizeof(char));
+
+    for (int i = 0; i < end - start; i++)
+        *(a + i) = string[start + i];
+    *(a + end - start) = '\0';
+
+    return a;
+}
+
+/** Convert substring to double (inclusive)
+ * WARNING: NO VALIDATION! */
+double substringToDouble(char* string, int start, int end)
+{
+    char s[end - start + 2];
+
+    for (int i = 0; i < end - start + 1; i++)
+        s[i] = string[start + i];
+    s[end - start + 1] = '\0';
+
+    return atof(s);
+}
+
+/** Reduce each space group in a string into one space. */
+void reduceSpaces(char* string)
+{
+    const char* s = string;
+    while (*s == ' ' && *s != '\0')
+        s++;
+    while ((*string++ = *s++) != '\0')
+    {
+        if ((*string++ = *s++) == ' ')
+            while (*s == ' ')
+                ++s;
+    }
+}
+
+char* generateHelpTitle(void)
+{
+    return generateTitle("---HELP TITLE---\n", "---HELP TITLE END---\n");
+}
+
+char* generateQuitTitle(void)
+{
+    return generateTitle("---QUIT TITLE---\n", "---QUIT TITLE END---");
+}
+
+static char* generateTitle(const char* from, const char* to)
+{
+    FILE* stream = fopen(TITLES_FILE_NAME, "r");
+
+    if (stream == NULL)
+    {
+        printf("#################################\nERROR: titles.txt not found!\n#################################\n");
+        return "";
+    }
+
+    // algorithming magik oooohhhh
+    char lines[50][MAX_LENGTH];
+    char cur_line[MAX_LENGTH]; 
+    int num_of_lines = 0;
+    int max_length = 0;
+    int success = 0;
+    while (fgets(cur_line, MAX_LENGTH, stream) != NULL)         // read lines
+        if (strcmp(cur_line, from) == 0)        // start reading title
+            while (fgets(cur_line, MAX_LENGTH, stream) != NULL) // reading title's lines
+            {
+                if (strcmp(cur_line, to) != 0)
+                {
+                    strcpy(lines[num_of_lines++], cur_line);
+                    int cur_length = strlen(cur_line);
+                    if (cur_length > max_length)
+                        max_length = cur_length;
+                }
+                else
+                {
+                    success = 1;
+                    goto finished_loops;
+                }
+            }
+
+    finished_loops:
+    if (!success)
+    {
+        printf("#################################\nERROR: titles.txt is corrupted!\n#################################\n");
+        return "";
+    }
+
+    char* result = (char*)malloc((num_of_lines + 6) * (max_length + 10));
+    if (result == NULL)
+        return generateTitle(from, to);
+
+    makeItCool(result, lines, num_of_lines, max_length);
+    fclose(stream);
+
+    return result;
+}
+
+/** Take an array of lines, add a border and put the result to dest.
+ * NOTE: must be handled carefully. */
+void makeItCool(char dest[], char lines[][MAX_LENGTH], int num_of_lines, int line_length)
+{
+    //printf("starting prettifing. num_of_lines: %d + 6. line_length: %d + 10.\n", num_of_lines, line_length);
+    line_length += 10; // 5 more chars in the start and in the end
+    num_of_lines += 6; // 3 more line in the start and in the end, it doesn't really matter.
+    char result[num_of_lines * line_length];
+    int i = 0;
+    for (int line = 0; line < num_of_lines; line++, i=0)
+    {
+        //printf("\n------starting line %d--------\n", line);
+        if (line == 0 || line == num_of_lines - 1)      // first and last lines
+        {
+            while(i < 4)                result[line * line_length + i++] = ' ';
+            while(i < line_length - 5)  result[line * line_length + i++] = BORDER_CHAR;
+            while(i < line_length - 1)  result[line * line_length + i++] = ' ';
+        }
+        else if (line == 1 || line == num_of_lines - 2) // second and almost-last lines
+        {
+            /* first char is ' '*/      result[line * line_length + i++] = ' ';
+            while(i < line_length - 2)  result[line * line_length + i++] = BORDER_CHAR;
+            /* last char is ' '*/       result[line * line_length + i++] = ' ';
+        }
+        else if (line == 2 || line == num_of_lines - 3) // second and almost-last lines
+        {
+            while(i < 2)                result[line * line_length + i++] = BORDER_CHAR;
+            while(i < line_length - 3)  result[line * line_length + i++] = ' ';
+            while(i < line_length - 1)  result[line * line_length + i++] = BORDER_CHAR;
+        }
+        else                                            // every other line
+        {
+            while(i < 2)                result[line * line_length + i++] = BORDER_CHAR;
+            while(i < 5)                result[line * line_length + i++] = ' ';
+            while((result[line * line_length + i] = lines[line - 3][i - 5]) != '\n') i++; // copy the line itself
+            while(i < line_length - 3)  result[line * line_length + i++] = ' ';
+            while(i < line_length - 1)  result[line * line_length + i++] = BORDER_CHAR;
+        }
+        result[line * line_length + i] = '\n';
+        //for(int j = 0; j < line * line_length + i; j++) printf("%c", result[j]);
+    }
+    result[num_of_lines * line_length] = '\0';
+
+    strcpy(dest, result);
 }
 
 /** Get count and that number of arguments, free those arguments and return ERROR_VALUE
@@ -382,7 +597,7 @@ double error(int count, ...)
     va_list list;
     va_start(list, count);
     for (int i = 0; i < count; i++)
-        free(va_arg(list, int));
+        free(va_arg(list, void*));
     va_end(list);
 
     return ERROR_VALUE;

@@ -1,5 +1,5 @@
 ---HELP TITLE---
-This is a culculator program.
+This is a calculator program.
 
 Write an expression using the next operations: + - * / % ^ !
 Write ANS for the value of the last calculation.
@@ -9,7 +9,7 @@ You can use 3 manually assigned variables: X, Y, Z.
 Assign those variables by X=[expression], like "X=3PI".
 
 Write HELP to view this message again.
-Write HISTORY to view the culculation history.
+Write HISTORY to view the calculation history.
 Write QUIT to quit the program.
 
 The program is case-insensitive, so SIN = sin, PI = pi etc.
@@ -18,5 +18,5 @@ The program is space-insensitive, use them freely (appropriatly).
 Enjoy!
 ---HELP TITLE END---
 ---QUIT TITLE---
-Thanks for using my culculator program!
+Thanks for using my calculator program!
 ---QUIT TITLE END---

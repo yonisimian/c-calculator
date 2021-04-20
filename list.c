@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "utils.h"
+#include "defines.h"
 
 typedef struct Node
 {
@@ -24,6 +24,7 @@ static void calculateBinOp(List list, int round);
 static void forceError(List list);
 static void printOp(int index, Op* op);
 static Node* nodeRemove(List list, Node* node);
+static int factorial(int num);
 
 List listCreate(void)
 {
@@ -79,7 +80,6 @@ void listCalculate(List list)
     // so if there's more than 1 node, probably an unappropriate space was entered.
     if (list->size > 1)
     {
-        //printf("%s: culculation gone wrong, hit developer for more information.\n", CODING_ERROR);
         printf("%s: more than 1 expression was entered (check for unappropriate spaces)\n", SYNTAX_ERROR);
         forceError(list);
         return;
@@ -124,6 +124,13 @@ static void calculateFunctions(List list)
                 return;
             }
 
+            if ((ptr->next->data.value / (pi/2)) == 1 && op.value == TAN)
+            {
+                printf("%s: tan of (pi+2k)/2 is undefined.\n", MATH_ERROR);
+                forceError(list);
+                return;
+            }
+
             switch((int)op.value)
             {
                 case SIN:  ptr->data.value = sin(ptr->next->data.value); break;
@@ -158,7 +165,7 @@ static void calculateUnOp(List list)
         if (op.type == OPERATOR)
         {
             // checking for errors first
-            if (ptr->next == NULL)
+            if (ptr->next == NULL && op.value != '!') // basically if end with (-)
             {
                 printf("%s: you can't end with a %c, sire!\n", SYNTAX_ERROR, (int)ptr->data.value);
                 forceError(list);
@@ -170,30 +177,56 @@ static void calculateUnOp(List list)
             {
                 case '!':
                 {
+                    // error checking
+                    if (ptr->next == NULL) // basically if end with (-)
+                    {
+                        printf("%s: you are a pretty girl, but you must have an oprand before factorial :(\n", SYNTAX_ERROR);
+                        forceError(list);
+                        return;
+                    }
+
                     if (ptr->prev->data.type != OPRAND)
                     {
                         printf("%s: ! works on oprands (numbers) only, babe ^^\n", SYNTAX_ERROR);
                         forceError(list);
                         return;
                     }
+
                     if (ptr->prev->data.value - (int)ptr->prev->data.value != 0)
                     {
                         printf("%s: ! works on integers only uwu\n", MATH_ERROR);
                         forceError(list);
                         return;
                     }
+
+                    if (ptr->prev->data.value > 31)
+                    {
+                        printf("%s: the result was too dangerous to be left alive!\n", MATH_ERROR);
+                        forceError(list);
+                        return;
+                    }
+
+                    // no errors
                     ptr->prev->data.value = factorial(ptr->prev->data.value);
                     ptr = nodeRemove(list, ptr);
                     continue;
                 }
                 case '-':
                 {
-                    if (ptr->prev == NULL || ptr->prev->data.type != OPRAND)
+                    if (ptr->next == NULL)
                     {
+                        printf("%s: you can't end with a (-), sire!\n", SYNTAX_ERROR);
+                        forceError(list);
+                        return;
+                    }
+                    else if (ptr->prev == NULL || ptr->prev->data.type != OPRAND)
+                    {
+                        // you know... I'm not even sure if this code is reachable lmao
                         if (ptr->next->data.type != OPRAND)
                         {
                             printf("%s: you must substract SOMETHING, fella.\n", SYNTAX_ERROR);
                             forceError(list);
+                            return;
                         }
                         else // prev node isn't OPRAND, next node is OPRAND
                         {
@@ -202,12 +235,11 @@ static void calculateUnOp(List list)
                             continue;
                         }
                     }
-                    else
+                    else // if (next and prev aren't NULL) is taken care in round 3
                     {
                         ptr = ptr->next;
                         continue;
                     }
-                    break;
                 }
                 default:
                     ptr = ptr->next;
@@ -217,6 +249,18 @@ static void calculateUnOp(List list)
         else
             ptr = ptr->next;
     }
+}
+
+/** Calculate the factorial of a non-negative number. */
+int factorial(int num)
+{
+    if (num < 0)
+        return 0;
+    
+    if (num == 0 || num == 1)
+        return 1;
+
+    return num * factorial(num - 1);
 }
 
 /** calculates binary operators in the list.
