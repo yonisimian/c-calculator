@@ -114,11 +114,11 @@ If an error occurs during the expression calculation itself, an error message wi
 >**Note:** What do I mean by "user friendly"? That a dynamic error message is printed, such as "ERROR: no @ symbols allowd" instead of the boring "SYNTAX ERROR" most calculators print (without telling **what** was the error).
 
 ###  Notes
-- There are 4 ``.c`` files in the solution:
+- There are 3 ``.c`` files in the solution:
 	- ``calculator.c``, which has the main algorithm and functions.
-	- ``utils.c``, which holds the ``#define``s and more utility functions.
 	- ``list.c``, which is the linked list ADT (and also calculates the expression).
 	- ``queue.c``, which is the queue data structure for the history of calculations.
+- There is also ``defines.h``, which holds the ``#define``s and ``typedef``s.
 - The program also handles reading data from files, and if the ``titles.txt`` file is missing or changed - the program won't run.
 - All of the possible words, Op types and errors are stored in *enums*.
 - When checking for letters and words I decided to check it NOT case-sensitive, so that the program will become more user friendly (either pi, PI or Pi equal 3.14).
