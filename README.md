@@ -123,6 +123,7 @@ If an error occurs during the expression calculation itself, an error message wi
 - All of the possible words, Op types and errors are stored in *enums*.
 - When checking for letters and words I decided to check it NOT case-sensitive, so that the program will become more user friendly (either pi, PI or Pi equal 3.14).
 - I have tried not to exceed time and space complexity of O(n), and the usage of the queue for that one simple purpose (a list of history calculations) is solely for efficiency (O(1)).
+- Limitations: rounding starts at a difference of 0.000000001, so 6.999999999 = 7. Moreover, the program is having difficulties in managing large numbers (it might return 0 or -2.14748e+009, but anyway it won't collapse :D )
 
 ## Summary
 The calculator's purpose was helping me learn the C language, so when I could use std functions I DID use them - as they are essential for learning the language (in my opinion).
