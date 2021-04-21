@@ -178,29 +178,30 @@ static void calculateUnOp(List list)
             {
                 case '!':
                 {
+                    Node* prev = ptr->prev;
                     // error checking
-                    if (ptr->prev == NULL)
+                    if (prev == NULL)
                     {
                         printf("%s: you are a pretty girl, but you must have an oprand before factorial :(\n", SYNTAX_ERROR);
                         forceError(list);
                         return;
                     }
 
-                    if (ptr->prev->data.type != OPRAND)
+                    if (prev->data.type != OPRAND)
                     {
                         printf("%s: ! works on oprands (numbers) only, babe ^^\n", SYNTAX_ERROR);
                         forceError(list);
                         return;
                     }
 
-                    if (ptr->prev->data.value - (int)ptr->prev->data.value != 0)
+                    if (prev->data.value - (int)prev->data.value != 0)
                     {
                         printf("%s: ! works on integers only uwu\n", MATH_ERROR);
                         forceError(list);
                         return;
                     }
 
-                    if (ptr->prev->data.value > 31)
+                    if (prev->data.value > 31)
                     {
                         printf("%s: the result was too dangerous to be left alive!\n", MATH_ERROR);
                         forceError(list);
@@ -208,9 +209,18 @@ static void calculateUnOp(List list)
                     }
 
                     // no errors
-                    ptr->prev->data.value = factorial(ptr->prev->data.value);
-                    ptr = nodeRemove(list, ptr);
-                    continue;
+                    if (prev->data.value < 0) // so -5! become -(5!)
+                    {
+                        prev->data.value = factorial(-prev->data.value) * -1;
+                        ptr = nodeRemove(list, ptr);
+                        continue;
+                    }
+                    else // normal calculation, like 5!
+                    {
+                        prev->data.value = factorial(prev->data.value);
+                        ptr = nodeRemove(list, ptr);
+                        continue;
+                    }
                 }
                 case '-':
                 {
@@ -222,7 +232,6 @@ static void calculateUnOp(List list)
                     }
                     else if (ptr->prev == NULL || ptr->prev->data.type != OPRAND)
                     {
-                        // you know... I'm not even sure if this code is reachable lmao
                         if (ptr->next->data.type != OPRAND)
                         {
                             printf("%s: you must substract SOMETHING, fella.\n", SYNTAX_ERROR);
