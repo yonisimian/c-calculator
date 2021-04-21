@@ -179,7 +179,7 @@ static void calculateUnOp(List list)
                 case '!':
                 {
                     // error checking
-                    if (ptr->next == NULL) // basically if end with (-)
+                    if (ptr->prev == NULL)
                     {
                         printf("%s: you are a pretty girl, but you must have an oprand before factorial :(\n", SYNTAX_ERROR);
                         forceError(list);
