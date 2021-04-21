@@ -65,6 +65,7 @@ int listAdd(List list, Op op)
     return 1;
 }
 
+// ====================== listCalculate ====================== //
 void listCalculate(List list)
 {
     if (list == NULL || list->size == 0)
@@ -105,9 +106,9 @@ static void calculateFunctions(List list)
             // check for errors
             if (ptr->next == NULL || ptr->next->data.type != OPRAND)
             {
-                    printf("%s: you must put an oprand after a function, my dude.\n", SYNTAX_ERROR);
-                    forceError(list);
-                    return;
+                printf("%s: you must put an oprand after a function, my dude.\n", SYNTAX_ERROR);
+                forceError(list);
+                return;
             }
 
             if (ptr->next->data.value <= 0 && (op.value == LOG || op.value == LN))
@@ -251,18 +252,6 @@ static void calculateUnOp(List list)
     }
 }
 
-/** Calculate the factorial of a non-negative number. */
-int factorial(int num)
-{
-    if (num < 0)
-        return 0;
-    
-    if (num == 0 || num == 1)
-        return 1;
-
-    return num * factorial(num - 1);
-}
-
 /** calculates binary operators in the list.
  * round 1 - calculates ^
  * round 2 - calculates *, /, %
@@ -363,6 +352,7 @@ static void calculateBinOp(List list, int round)
             ptr = ptr->next;
     }
 }
+// ====================== end of listCalculate ====================== //
  
 Op* listGet(List list, int index)
 {
@@ -535,4 +525,16 @@ static Node* nodeRemove(List list, Node* node)
     free(node);
 
     return next;
+}
+
+/** Calculate the factorial of a non-negative number. */
+static int factorial(int num)
+{
+    if (num < 0)
+        return 0;
+    
+    if (num == 0 || num == 1)
+        return 1;
+
+    return num * factorial(num - 1);
 }

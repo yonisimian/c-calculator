@@ -80,23 +80,23 @@ E--next-->W[NULL]
 >If a graph isn't viewed, use this extension: https://github.com/BackMarket/github-mermaid-extension
 
 - The first scans of finding functions and operators (as ``!`` and ``^``) do nothing.
-- The scan to find ``*``, ``/`` and ``%`` stops at the four node, which is ``*``.
+- The third scan (to find ``*``, ``/`` and ``%``) stops at the four node, which is ``*``.
 The calculation *2 x 30* is being done and stored in the prev node of ``*`` while the ``*`` and ``30`` are released from the list, so the linked list now looks like this: 
 ```mermaid
 graph LR
 Q[NULL]--prev---A[1]
 A--next-->B[+]
 B--prev-->A
-B--next-->C[30]
+B--next-->C[60]
 C--prev-->B
 C--next-->W[NULL]
 ```
 - The next and final scan is for ``+`` and ``-``, so it stops in the second node.
-The calculation *1 + 30* is being done and the ``+`` and ``30`` nodes are freed.
+The calculation *1 + 60* is being done and the ``+`` and ``60`` nodes are freed.
 The form of the final list is:
 ```mermaid
 graph LR
-Q[NULL]--prev---A[31]
+Q[NULL]--prev---A[61]
 A--next-->W[NULL]
 ```
 The algorithm recognizes that only one node is left, so it's value is  returned as the answer to the expression, which is printed to the screen and **saved in the history queue**.
