@@ -16,10 +16,12 @@ It can calculate expressions that use the following material:
 - **Constants**: e, pi, phi
 - Manually stored **variables**: x, y, z (and ans for the last calculated answer)
 
-It can also handle 3 user commands:
+It can also handle 5 user commands:
 - ``help``, for viewing the titles of the program.
 - ``history``, for *viewing the last 50 calculations* that have been done.
 - ``quit``, for quitting the program manually and releasing dynamic memory.
+- ``rad``, to set the calculator's mode to radians.
+- ``deg``, to set the calculator's mode to degrees.
 
 The program can handle various exceptions (I hope every possible one), such as:
 - Typing either unknown words or symbols.

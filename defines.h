@@ -15,6 +15,8 @@
 #define pi  3.14159265358
 #define phi 1.61803398874
 
+extern char is_radians; // initialized in "list.c", changed in "calculator.c"
+
 typedef enum ErrorCode
 {
     NO_ERROR,
@@ -38,7 +40,7 @@ typedef enum Word
     UNKNOWN_WORD,
 
     // command words
-    HELP, HISTORY, QUIT,
+    HELP, HISTORY, QUIT, RAD, DEG,
 
     // functions
     SIN, COS, TAN, SQRT, LOG, LN, ABS,

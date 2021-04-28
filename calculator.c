@@ -16,7 +16,7 @@
 #include <string.h>
 #include <math.h>
 #include <conio.h>
-#include <stdarg.h>
+#include <stdarg.h> 
 
 #include "list.h"
 #include "queue.h"
@@ -34,8 +34,6 @@ double variable_y = 0;
 double variable_z = 0;
 double variable_ans = 0;
 
-char is_radians = 1; // 0 to use degrees, 1 to use radians.
-
 // main's functions
 void getExpression(char* expression);
 enum ErrorCode validateExpression(char* expression, int* another);
@@ -52,7 +50,7 @@ int findEndOfWord(char* string, int index);
 int findClosingBracket(char* string, int index);
 OpType getType(char* string, int index);
 int getWord(char* word);
-static char* WORDS[] = {"help", "history", "quit", "sin", "cos", "tan", "sqrt", "log", "ln", "abs", "e", "pi", "phi", "x", "y", "z", "ans"}; 
+static char* WORDS[] = {"help", "history", "quit", "rad", "deg", "sin", "cos", "tan", "sqrt", "log", "ln", "abs", "e", "pi", "phi", "x", "y", "z", "ans"}; 
 
 // Miscellaneous utility functions
 char* substring(char string[], int start, int length);
@@ -79,6 +77,8 @@ int main()
     printf("%s\n", HELP_TITLE);
 
     // Declarations
+    //char is_radians = 1;         // 0 to use degrees, 1 to use radians.
+    is_radians = 1;
     int another = 1;             // Continue if we want another calculation
     char expression[MAX_LENGTH]; // The expression to calculate
     history = queueCreate();
@@ -163,6 +163,8 @@ int isUserCommand(char* expression, int* another)
         case HELP:    printf("%s\n", HELP_TITLE); return 1;
         case HISTORY: queuePrint(history);        return 1;
         case QUIT:    *another = 0;               return 1;
+        case RAD:     is_radians = 1; printf("Changed to RADIANS mode successfuly :)\n"); return 1;
+        case DEG:     is_radians = 0; printf("Changed to DEGREES mode successfuly :)\n"); return 1;
         default:
             return 0;
     }
@@ -234,10 +236,10 @@ double calculate(char* expression)
                 }
                 int value = getWord(word);
 
-                // commands: HELP, HISTORY, QUIT
+                // commands: HELP, HISTORY, QUIT, RAD, DEG
                 if (value >= HELP && value < SIN)
                 {
-                    printf("The words HELP, HISTORY and QUIT must come alone and not inside an expression.\n");
+                    printf("The user commands (HELP etc.) must come alone and not inside an expression.\n");
                     return error(2, list, word);
                 }
 
