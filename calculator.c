@@ -327,9 +327,10 @@ double calculate(char* expression)
     // rounding the result 
     if (result != ERROR_VALUE)
     {
-        double epsilon = result - (int)result;
-        if (epsilon < 0.000000001) result = (int)result;
-        if (epsilon > 0.999999999) result = (int)(result + 1);
+        double floored = floor(result);
+        double epsilon = result - floored;
+        if (epsilon < 0.000000001) result = floored;
+        if (epsilon > 0.999999999) result = floored + 1;
     }
 
     listDestroy(list);
