@@ -34,7 +34,7 @@ double variable_y = 0;
 double variable_z = 0;
 double variable_ans = 0;
 
-char is_radians = 0; // 0 to use degrees, 1 to use radians.
+char is_radians = 1; // 0 to use degrees, 1 to use radians.
 
 // main's functions
 void getExpression(char* expression);
