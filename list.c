@@ -111,21 +111,23 @@ static void calculateFunctions(List list)
                 return;
             }
 
-            if (ptr->next->data.value <= 0 && (op.value == LOG || op.value == LN))
+            double value = ptr->next->data.value;
+
+            if (value <= 0 && (op.value == LOG || op.value == LN))
             {
                 printf("%s: Remember! log and ln can only operate on positive values.\n", MATH_ERROR);
                 forceError(list);
                 return;
             }
             
-            if (ptr->next->data.value < 0 && op.value == SQRT)
+            if (value < 0 && op.value == SQRT)
             {
                 printf("%s: Remember! sqrt can only operate on non-negative values.\n", MATH_ERROR);
                 forceError(list);
                 return;
             }
 
-            if ((ptr->next->data.value / (pi/2)) == 1 && op.value == TAN)
+            if ((value / (pi/2)) == 1 && op.value == TAN)
             {
                 printf("%s: tan of (pi+2k)/2 is undefined.\n", MATH_ERROR);
                 forceError(list);
@@ -134,13 +136,13 @@ static void calculateFunctions(List list)
 
             switch((int)op.value)
             {
-                case SIN:  ptr->data.value = sin(ptr->next->data.value); break;
-                case COS:  ptr->data.value = cos(ptr->next->data.value); break;
-                case TAN:  ptr->data.value = tan(ptr->next->data.value); break;
-                case SQRT: ptr->data.value = sqrt(ptr->next->data.value); break;
-                case LOG:  ptr->data.value = log10(ptr->next->data.value); break;
-                case LN:   ptr->data.value = log(ptr->next->data.value); break;
-                case ABS:  ptr->data.value = (ptr->next->data.value < 0) ? -(ptr->next->data.value) : ptr->next->data.value; break;           
+                case SIN:  ptr->data.value = sin(value); break;
+                case COS:  ptr->data.value = cos(value); break;
+                case TAN:  ptr->data.value = tan(value); break;
+                case SQRT: ptr->data.value = sqrt(value); break;
+                case LOG:  ptr->data.value = log10(value); break;
+                case LN:   ptr->data.value = log(value); break;
+                case ABS:  ptr->data.value = (value < 0) ? -(value) : value; break;           
                 default:
                     printf("%s: you shouldn't have reached here. My mistake :|\n", CODING_ERROR);
                     forceError(list);
