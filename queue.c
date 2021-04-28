@@ -25,7 +25,7 @@ static qNode* qNodeCreate(char* expression, double result);
 
 Queue queueCreate(void)
 {
-    Queue queue = (Queue)malloc(sizeof(Queue));
+    Queue queue = (Queue)malloc(sizeof(*queue));
     if (queue == NULL)
         return NULL;
     

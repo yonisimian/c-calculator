@@ -6,7 +6,10 @@ Write ANS for the value of the last calculation.
 You can use the constants E, PI, PHI anytime you'd like.
 You can use the functions SIN, COS, TAN, SQRT, LOG, LN, ABS.
 You can use 3 manually assigned variables: X, Y, Z.
-Assign those variables by X=[expression], like "X=3PI".
+
+NOTE: Trigonometric functions are in radians and not degrees.
+NOTE: LOG function is in base 10
+NOTE: Assign variables by X=[expression], like "X=3PI".
 
 Write HELP to view this message again.
 Write HISTORY to view the calculation history.

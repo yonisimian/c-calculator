@@ -22,7 +22,7 @@
 #include "queue.h"
 #include "defines.h"
 
-// ====================== defines ====================== //
+// ====================== declarations ====================== //
 
 Queue history;
 char* HELP_TITLE;
@@ -534,10 +534,10 @@ static char* generateTitle(const char* from, const char* to)
         return "";
     }
 
-    char* result = (char*)malloc((num_of_lines + 6) * (max_length + 10));
+    char* result = (char*)malloc((num_of_lines + 6) * (max_length + 10) + 1); // +1 for the '\0' char
     if (result == NULL)
         return generateTitle(from, to);
-
+        
     makeItCool(result, lines, num_of_lines, max_length);
     fclose(stream);
 
@@ -549,9 +549,9 @@ static char* generateTitle(const char* from, const char* to)
 void makeItCool(char dest[], char lines[][MAX_LENGTH], int num_of_lines, int line_length)
 {
     //printf("starting prettifing. num_of_lines: %d + 6. line_length: %d + 10.\n", num_of_lines, line_length);
-    line_length += 10; // 5 more chars in the start and in the end
+    line_length += 10; // 5 more chars in the start and in the end.
     num_of_lines += 6; // 3 more line in the start and in the end, it doesn't really matter.
-    char result[num_of_lines * line_length];
+    char result[num_of_lines * line_length + 1]; // +1 for the '\0' char. 
     int i = 0;
     for (int line = 0; line < num_of_lines; line++, i=0)
     {
@@ -606,7 +606,7 @@ double error(int count, ...)
 /** Quit the program ellegantly (did I write it right? or left? :\) **/
 int quitProgram(void)
 {
-    printf("Press any key to continue...");
+    printf("Press any key to continue...\n");
     getch();
 
     return 0;
