@@ -106,9 +106,9 @@ static void calculateFunctions(List list)
         if (op.type == FUNCTION)
         {
             // check for errors
-            if (ptr->next == NULL || ptr->next->data.type != OPRAND)
+            if (ptr->next == NULL || ptr->next->data.type != OPERAND)
             {
-                printf("%s: you must put an oprand after a function, my dude.\n", SYNTAX_ERROR);
+                printf("%s: you must put an operand after a function, my dude.\n", SYNTAX_ERROR);
                 forceError(list);
                 return;
             }
@@ -150,7 +150,7 @@ static void calculateFunctions(List list)
                     forceError(list);
                     return;
             }
-            ptr->data.type = OPRAND;
+            ptr->data.type = OPERAND;
             nodeRemove(list, ptr->next);
         }
 
@@ -186,14 +186,14 @@ static void calculateUnOp(List list)
                     // error checking
                     if (prev == NULL)
                     {
-                        printf("%s: you are a pretty girl, but you must have an oprand before factorial :(\n", SYNTAX_ERROR);
+                        printf("%s: you are a pretty girl, but you must have an operand before factorial :(\n", SYNTAX_ERROR);
                         forceError(list);
                         return;
                     }
 
-                    if (prev->data.type != OPRAND)
+                    if (prev->data.type != OPERAND)
                     {
-                        printf("%s: ! works on oprands (numbers) only, babe ^^\n", SYNTAX_ERROR);
+                        printf("%s: ! works on operands (numbers) only, babe ^^\n", SYNTAX_ERROR);
                         forceError(list);
                         return;
                     }
@@ -234,15 +234,15 @@ static void calculateUnOp(List list)
                         forceError(list);
                         return;
                     }
-                    else if (ptr->prev == NULL || ptr->prev->data.type != OPRAND)
+                    else if (ptr->prev == NULL || ptr->prev->data.type != OPERAND)
                     {
-                        if (ptr->next->data.type != OPRAND)
+                        if (ptr->next->data.type != OPERAND)
                         {
                             printf("%s: you must substract SOMETHING, fella.\n", SYNTAX_ERROR);
                             forceError(list);
                             return;
                         }
-                        else // prev node isn't OPRAND, next node is OPRAND
+                        else // prev node isn't OPERAND, next node is OPERAND
                         {
                             ptr->next->data.value *= -1;
                             ptr = nodeRemove(list, ptr);
@@ -286,9 +286,9 @@ static void calculateBinOp(List list, int round)
                 forceError(list);
                 return;
             }
-            if (ptr->prev->data.type != OPRAND || ptr->next->data.type != OPRAND)
+            if (ptr->prev->data.type != OPERAND || ptr->next->data.type != OPERAND)
             {
-                printf("%s: you must have oprands before and after your %c, honey ~:\n", SYNTAX_ERROR, (int)ptr->data.value);
+                printf("%s: you must have operands before and after your %c, honey ~:\n", SYNTAX_ERROR, (int)ptr->data.value);
                 forceError(list);
                 return;
             }
@@ -497,10 +497,10 @@ void listPrint2(List list)
 }
 
 /** Print node's values in the next format:
- * Op 1 - type OPRAND, value 5.5 */
+ * Op 1 - type OPERAND, value 5.5 */
 static void printOp(int index, Op* op)
 {
-    char types[3][10] = { "UNKNOWN", "OPRAND", "OPERATOR" };
+    char types[3][10] = { "UNKNOWN", "OPERAND", "OPERATOR" };
     if (op->type == OPERATOR)
         printf("Op %d - type %s, value %c\n", index, types[op->type], (int)(op->value));
     else
@@ -517,7 +517,7 @@ static void forceError(List list)
     while (list->head != NULL)
         listRemoveAt(list, 0);
     
-    listAdd(list, (Op){ .type = OPRAND, .value = ERROR_VALUE });
+    listAdd(list, (Op){ .type = OPERAND, .value = ERROR_VALUE });
 }
 
 /** C'mon tis not need for eggsplenashen

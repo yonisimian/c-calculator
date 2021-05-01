@@ -134,8 +134,8 @@ ErrorCode validateExpression(char* expression, int* another)
     if (expression == NULL || strlen(expression) < 1)
         return SILENT_ERROR;
 
-    int command;
-    if (command = isUserCommand(expression))
+    int command = isUserCommand(expression);
+    if (command && command < SIN)
     {
         switch (command)
         {
@@ -219,7 +219,7 @@ double calculate(char* expression)
         Op cur_op = { .type = getType(expression, i), .value = expression[i] };
         switch (cur_op.type)
         {
-            case OPRAND:
+            case OPERAND:
             {
                 int end = findEndOfNumber(expression, i);
                 cur_op.value = substringToDouble(expression, i, end);
@@ -259,7 +259,7 @@ double calculate(char* expression)
                 // constants: E, PI, PHI,   storage variables: X, Y, Z, ANS
                 else if (value >= E && value <= ANS)
                 {
-                    cur_op.type = OPRAND;
+                    cur_op.type = OPERAND;
                     switch (value)
                     {
                         case E:   cur_op.value = e; break;
@@ -318,7 +318,7 @@ double calculate(char* expression)
                         double inner_result = calculate(inner_expression);
                         free(inner_expression);
 
-                        cur_op.type = OPRAND;
+                        cur_op.type = OPERAND;
                         cur_op.value = inner_result;
 
                         addMultiplicationIfNeeded(list); // so 5(1+2) becomes 5*(1+2)
@@ -373,7 +373,7 @@ void addMultiplicationIfNeeded(List list)
     if (size > 0)
     {
         Op last_op = *listGet(list, size - 1);
-        if (last_op.type == OPRAND)
+        if (last_op.type == OPERAND)
         {
             Op new_op = { .type = OPERATOR, .value = '*' };
             listAdd(list, new_op);
@@ -385,12 +385,12 @@ void addMultiplicationIfNeeded(List list)
 void addZeroBeforeMinus(List list)
 {
     if (listSize(list) == 0)
-        listAdd(list, (Op){ .type = OPRAND, .value = 0 });
+        listAdd(list, (Op){ .type = OPERAND, .value = 0 });
     else
     {
         Op last_op = *listGet(list, listSize(list) - 1);
-        if (last_op.type != OPRAND)
-            listAdd(list, (Op){ .type = OPRAND, .value = 0 });
+        if (last_op.type != OPERAND)
+            listAdd(list, (Op){ .type = OPERAND, .value = 0 });
     }
 }
 
@@ -398,9 +398,9 @@ void addZeroBeforeMinus(List list)
  * NOTE: can return index of a point, since atof can handle it. */
 int findEndOfNumber(char* string, int index)
 {
-    while (getType(string, ++index) == OPRAND);
+    while (getType(string, ++index) == OPERAND);
     if (*(string + index) == '.')
-        while (getType(string, ++index) == OPRAND);
+        while (getType(string, ++index) == OPERAND);
     
     return index - 1;
 }
@@ -452,7 +452,7 @@ OpType getType(char* string, int index)
         default:
         {
             if (c >= '0' && c <= '9')
-                return OPRAND;
+                return OPERAND;
             
             if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
                 return LETTER;

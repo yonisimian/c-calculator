@@ -28,10 +28,10 @@ typedef enum ErrorCode
 typedef enum OpType
 {
     UNKNOWN,
-    OPRAND,     // 1 2 etc.
+    OPERAND,     // 1 2 etc.
     OPERATOR,   // + - etc.
     PARENTHESES,// ( )
-    LETTER,     // input letters, can become FUNCTIONs (sin) or OPRANDs (pi)
+    LETTER,     // input letters, can become FUNCTIONs (sin) or OPERANDs (pi)
     FUNCTION    // recognized words, stored in the list for calculating
 } OpType;
 
@@ -55,7 +55,7 @@ typedef enum Word
 
 typedef struct Op
 {
-    OpType type;    // OPRAND or OPERATOR or FUNCTION
+    OpType type;    // OPERAND or OPERATOR or FUNCTION
     double value;
 } Op;
 

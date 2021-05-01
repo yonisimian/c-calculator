@@ -39,11 +39,11 @@ void listPrint(const List list);
 
 /** Print a list in the next format:
  * List of size 5:
- * Op 1 - OPRAND - 1
+ * Op 1 - OPERAND - 1
  * Op 2 - OPERATOR - +
- * Op 3 - OPRAND - 69
+ * Op 3 - OPERAND - 69
  * Op 4 - OPERATOR - *
- * Op 5 - OPRAND - 420
+ * Op 5 - OPERAND - 420
  * End of list.
  * NOTE: made for debugging purposes.
  **/
