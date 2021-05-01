@@ -611,8 +611,9 @@ double error(int count, ...)
 /** Quit the program ellegantly (did I write it right? or left? :\) **/
 int quitProgram(void)
 {
-    printf("Press any key to continue...\n");
+    printf("Press any key to continue...");
     getch();
-
+    printf("\n");
+    
     return 0;
 }

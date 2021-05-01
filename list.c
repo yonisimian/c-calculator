@@ -386,22 +386,25 @@ int listRemoveAt(List list, int index)
         return 0;
     
     Node* ptr = list->head;
-    int i = 0;
-    while (ptr != NULL && ptr->next != NULL && i++ < index)
-        ptr = ptr->next;
+    for (int i = 0; ptr != NULL && ptr->next != NULL && i < index; ptr = ptr->next, i++);
     
     if (ptr->next != NULL)
     {
-        if (ptr->prev != NULL) // ptr = mid element
+        if (ptr->prev != NULL)  // ptr = mid element
         {
             ptr->prev->next = ptr->next;
             ptr->next->prev = ptr->prev;
         }
-        else // ptr = first element
+        else                    // ptr = first element
+        {
             ptr->next->prev = NULL;
+            list->head = ptr->next;
+        }
     }
     else if (ptr->prev != NULL) // ptr = last element
-            ptr->prev->next = NULL;
+        ptr->prev->next = NULL;
+    else                        // ptr = only element
+        list->head = NULL;
 
     free(ptr);
     list->size--;
@@ -431,12 +434,12 @@ void listDestroy(List list)
 int listSize(List list)
 {
     if (list == NULL)
-        return 0;
+        return -1;
 
     return list->size;
 }
 
-void listPrint(List list)
+void listPrint(const List list)
 {
     if (list == NULL)
     {
@@ -444,7 +447,7 @@ void listPrint(List list)
         return;
     }
     
-    if (list->head == NULL)
+    if (list->head == NULL || list->size <= 0)
     {
         if (list->size != 0)
             printf("%s: Something's wrong, I can feel it. list's size is %d but head is NULL.\n", CODING_ERROR, list->size);
@@ -508,8 +511,12 @@ static void printOp(int index, Op* op)
  * Takes any list and convert it to list one node with value ERROR_VALUE. */
 static void forceError(List list)
 {
-    listDestroy(list);
-    list = listCreate();
+    if (list == NULL)
+        list = (List)malloc(sizeof(*list));
+
+    while (list->head != NULL)
+        listRemoveAt(list, 0);
+    
     listAdd(list, (Op){ .type = OPRAND, .value = ERROR_VALUE });
 }
 

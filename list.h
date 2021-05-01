@@ -35,7 +35,7 @@ int listSize(List list);
 /** Print a list in the next format:
  * [1, *, 3, +, 69, 420, !]
  * NOTE: made for debugging purposes. */
-void listPrint(List list);
+void listPrint(const List list);
 
 /** Print a list in the next format:
  * List of size 5:
