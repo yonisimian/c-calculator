@@ -37,7 +37,7 @@ double variable_ans = 0;
 // main's functions
 void getExpression(char* expression);
 enum ErrorCode validateExpression(char* expression, int* another);
-int isUserCommand(char* expression, int* another);
+int isUserCommand(char* expression);
 int isAssignment(char* expression);
 
 double calculate(char* expression);
@@ -134,11 +134,25 @@ ErrorCode validateExpression(char* expression, int* another)
     if (expression == NULL || strlen(expression) < 1)
         return SILENT_ERROR;
 
-    if (isUserCommand(expression, another))
+    int command;
+    if (command = isUserCommand(expression))
+    {
+        switch (command)
+        {
+            case HELP:    printf("%s\n", HELP_TITLE); break;
+            case HISTORY: queuePrint(history);        break;
+            case QUIT:    *another = 0;               break;
+            case RAD:     is_radians = 1; printf("Changed to RADIANS mode successfuly :)\n"); break;
+            case DEG:     is_radians = 0; printf("Changed to DEGREES mode successfuly :)\n"); break;
+        }
         return SILENT_ERROR;
+    }
 
     reduceSpaces(expression);
-    if ((int)strlen(expression) > MAX_LENGTH)
+    int length = (int)strlen(expression);
+    if (length < 1 || (length == 1 && *expression == ' '))
+        return SILENT_ERROR;
+    if (length > MAX_LENGTH)
         return TOO_LONG;
 
     int is_assignment = isAssignment(expression);
@@ -150,24 +164,15 @@ ErrorCode validateExpression(char* expression, int* another)
     return NO_ERROR;
 }
 
-/** Check if the input is HELP, HISTORY or QUIT.
- * Set "another" to 0 if user chose to quit. */
-int isUserCommand(char* expression, int* another)
+/** Check if the input is HELP, HISTORY, QUIT, RAD or DEG.
+ * Return the command's number. */
+int isUserCommand(char* expression)
 {
     char c = *expression;
     if ((!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))) || strlen(expression) > 10) // if not a letter or len > 10
         return 0;
 
-    switch (getWord(expression))
-    {
-        case HELP:    printf("%s\n", HELP_TITLE); return 1;
-        case HISTORY: queuePrint(history);        return 1;
-        case QUIT:    *another = 0;               return 1;
-        case RAD:     is_radians = 1; printf("Changed to RADIANS mode successfuly :)\n"); return 1;
-        case DEG:     is_radians = 0; printf("Changed to DEGREES mode successfuly :)\n"); return 1;
-        default:
-            return 0;
-    }
+    return getWord(expression);
 }
 
 /** Check if the expression is accually an assignment (of storage variables).
@@ -285,13 +290,33 @@ double calculate(char* expression)
                         continue;
                     case '(':
                     {
+                        // check if there's a closing bracket and in a logical place
                         int end = findClosingBracket(expression, i);
-                        char* inner_expression = substring(expression, i + 1, end);
-                        double inner_result = calculate(inner_expression);
-                        free(inner_expression);
-
                         if (end < 1)
                             return error(1, list);
+                        if (end == i + 1)
+                        {
+                            printf("%s: What is the purpose of ()? Why are we here anyway???\n", SYNTAX_ERROR);
+                            return error(1, list);
+                        }
+
+                        // check if inner expression is valid
+                        char* inner_expression = substring(expression, i + 1, end);
+                        if (isUserCommand(inner_expression))
+                        {
+                            printf("The user commands (HELP etc.) must come alone and not inside an expression.\n");
+                            return error(1, list);
+                        }
+                        int dummy = 0;
+                        if (validateExpression(inner_expression, &dummy) != NO_ERROR)
+                        {
+                            printf("%s: The expression %s is not valid, we had to vaporize it :O\n", SYNTAX_ERROR, inner_expression);
+                            return error(1, list);
+                        }
+
+                        // calculate the inner expression and add result to the list
+                        double inner_result = calculate(inner_expression);
+                        free(inner_expression);
 
                         cur_op.type = OPRAND;
                         cur_op.value = inner_result;
@@ -474,7 +499,8 @@ double substringToDouble(char* string, int start, int end)
     return atof(s);
 }
 
-/** Reduce each space group in a string into one space. */
+/** Reduce each space group in a string into one space.
+ * NOTE: returned string won't start in space. */
 void reduceSpaces(char* string)
 {
     const char* s = string;
@@ -614,6 +640,6 @@ int quitProgram(void)
     printf("Press any key to continue...");
     getch();
     printf("\n");
-    
+
     return 0;
 }
